@@ -38,6 +38,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from configs.config import (
     HIGH_RISK_THRESHOLD,
     MEDIUM_RISK_THRESHOLD,
+    RAW_DIABETIC_DATA_PATH,
     SAVED_MODELS_DIR,
 )
 from src.data.load_data import load_raw_data
@@ -216,14 +217,18 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 # -----------------------------------------------------------------------------
 # Cached Model, Metadata, and Dataset Loaders
 # -----------------------------------------------------------------------------
+def get_file_mtime(file_path: Path) -> float:
+    """Returns file modification timestamp or 0.0 if not found, for cache key invalidation."""
+    try:
+        return file_path.stat().st_mtime if file_path.exists() else 0.0
+    except OSError:
+        return 0.0
+
+
 @st.cache_resource(show_spinner="Loading trained baseline model...")
-def load_trained_model_pipeline() -> Tuple[Any, Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
-    """
-    Loads the serialized Logistic Regression pipeline and associated metadata/metrics.
-    Returns:
-        (pipeline, metadata_dict, metrics_dict)
-    """
-    model_file = SAVED_MODELS_DIR / "baseline_logistic_regression.joblib"
+def _load_model_cached(model_path_str: str, mtime: float) -> Tuple[Any, Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+    """Loads model pipeline, metadata, and metrics keyed on path and modification time."""
+    model_file = Path(model_path_str)
     meta_file = SAVED_MODELS_DIR / "baseline_metadata.json"
     metrics_file = SAVED_MODELS_DIR / "baseline_metrics.json"
 
@@ -251,19 +256,32 @@ def load_trained_model_pipeline() -> Tuple[Any, Optional[Dict[str, Any]], Option
     return pipeline, metadata, metrics
 
 
-@st.cache_data(show_spinner="Ingesting cohort encounters & generating risk predictions...")
-def load_and_score_cohort() -> Optional[pd.DataFrame]:
+def load_trained_model_pipeline(
+    model_path: Optional[Path | str] = None,
+) -> Tuple[Any, Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
     """
-    Loads raw dataset, applies identical cohort eligibility rules (excluding terminal cases),
-    extracts the exact features expected by the trained pipeline, and computes predictions.
-
+    Loads the serialized Logistic Regression pipeline and associated metadata/metrics.
+    Cache key incorporates model path and file modification time to prevent stale cache.
     Returns:
-        pd.DataFrame: Scored eligible encounters with pseudonymous identifiers.
+        (pipeline, metadata_dict, metrics_dict)
     """
+    target_path = Path(model_path) if model_path is not None else (SAVED_MODELS_DIR / "baseline_logistic_regression.joblib")
+    mtime = get_file_mtime(target_path)
+    return _load_model_cached(str(target_path), mtime)
+
+
+@st.cache_data(show_spinner="Ingesting cohort encounters & generating risk predictions...")
+def _get_scored_cohort_cached(
+    data_path_str: str,
+    data_mtime: float,
+    model_path_str: str,
+    model_mtime: float,
+    _pipeline: Any,
+) -> Optional[pd.DataFrame]:
     try:
-        raw_df = load_raw_data()
+        raw_df = load_raw_data(data_path_str)
     except Exception as exc:
-        st.error(f"Error loading raw dataset from data/raw/: {exc}")
+        st.error(f"Error loading raw dataset from {data_path_str}: {exc}")
         return None
 
     # Apply strict cohort eligibility rule: exclude terminal encounters (expired / hospice)
@@ -280,17 +298,15 @@ def load_and_score_cohort() -> Optional[pd.DataFrame]:
         st.error(f"Missing required feature columns in cohort: {missing_cols}")
         return None
 
-    # Load trained model
-    pipeline, _, _ = load_trained_model_pipeline()
-    if pipeline is None:
-        st.error("Model pipeline could not be loaded from models/saved/baseline_logistic_regression.joblib.")
+    if _pipeline is None:
+        st.error("Model pipeline could not be loaded.")
         return None
 
     # Prepare input matrix
     X = cohort_df[feature_cols].copy()
 
     # Generate positive class predicted probabilities
-    probabilities = pipeline.predict_proba(X)[:, 1]
+    probabilities = _pipeline.predict_proba(X)[:, 1]
 
     # Build clean, pseudonymous encounter DataFrame
     # Note: patient_nbr and encounter_id are explicitly stripped from UI display
@@ -315,41 +331,101 @@ def load_and_score_cohort() -> Optional[pd.DataFrame]:
     scored_df["max_glu_serum_display"] = cohort_df["max_glu_serum"].fillna("None").values
     scored_df["a1c_result_display"] = cohort_df["A1Cresult"].fillna("None").values
 
-    # Derive top clinical driver label for quick table scanning
+    # Derive top clinical driver label for quick table scanning (fast array iteration)
     scored_df["top_driver"] = derive_top_driver_labels(scored_df)
 
+    # Pre-sort cohort descending by predicted_score once so reruns never re-sort 99k rows
+    scored_df = scored_df.sort_values(by="predicted_score", ascending=False).reset_index(drop=True)
+
     return scored_df
+
+
+def load_and_score_cohort(
+    data_path: Optional[Path | str] = None,
+    model_path: Optional[Path | str] = None,
+) -> Optional[pd.DataFrame]:
+    """
+    Loads raw dataset, applies identical cohort eligibility rules (excluding terminal cases),
+    extracts the exact features expected by the trained pipeline, computes predictions,
+    and returns encounters pre-sorted by predicted readmission risk.
+    """
+    target_data = Path(data_path) if data_path is not None else RAW_DIABETIC_DATA_PATH
+    target_model = Path(model_path) if model_path is not None else (SAVED_MODELS_DIR / "baseline_logistic_regression.joblib")
+
+    data_mtime = get_file_mtime(target_data)
+    model_mtime = get_file_mtime(target_model)
+
+    pipeline, _, _ = load_trained_model_pipeline(target_model)
+    if pipeline is None:
+        st.error("Model pipeline could not be loaded from models/saved/baseline_logistic_regression.joblib.")
+        return None
+
+    return _get_scored_cohort_cached(
+        str(target_data),
+        data_mtime,
+        str(target_model),
+        model_mtime,
+        _pipeline=pipeline,
+    )
 
 
 def derive_top_driver_labels(df: pd.DataFrame) -> List[str]:
     """
     Derives an interpretable, patient-specific primary risk driver label
     based on the dominant clinical risk indicators of the baseline model.
+    Optimized to iterate through NumPy arrays for fast vectorized execution.
     """
+    inpatient = df["num_inpatient"].to_numpy()
+    emergency = df["num_emergency"].to_numpy()
+    insulin = df["insulin"].to_numpy()
+    age = df["age_group"].astype(str).to_numpy()
+    los = df["length_of_stay"].to_numpy()
+    change = df["change"].to_numpy()
+    num_meds = df["num_medications"].to_numpy()
+
     drivers = []
-    for _, row in df.iterrows():
-        if row["num_inpatient"] >= 2:
-            drivers.append(f"Past Inpatient ({row['num_inpatient']} visits)")
-        elif row["num_emergency"] >= 2:
-            drivers.append(f"Frequent ER Utilization ({row['num_emergency']} visits)")
-        elif row["num_inpatient"] == 1:
+    for inp, emg, ins, a, l, chg, med in zip(
+        inpatient, emergency, insulin, age, los, change, num_meds
+    ):
+        if inp >= 2:
+            drivers.append(f"Past Inpatient ({inp} visits)")
+        elif emg >= 2:
+            drivers.append(f"Frequent ER Utilization ({emg} visits)")
+        elif inp == 1:
             drivers.append("Recent Inpatient Admission (1 visit)")
-        elif row["insulin"] in ["Up", "Down"]:
-            drivers.append(f"Insulin Instability ({row['insulin']})")
-        elif str(row["age_group"]) in ["[70-80)", "[80-90)", "[90-100)"]:
-            drivers.append(f"Geriatric Vulnerability ({row['age_group']})")
-        elif row["length_of_stay"] >= 7:
-            drivers.append(f"Extended Hospital Stay ({row['length_of_stay']}d)")
-        elif row["change"] == "Ch":
+        elif ins in ["Up", "Down"]:
+            drivers.append(f"Insulin Instability ({ins})")
+        elif a in ["[70-80)", "[80-90)", "[90-100)"]:
+            drivers.append(f"Geriatric Vulnerability ({a})")
+        elif l >= 7:
+            drivers.append(f"Extended Hospital Stay ({l}d)")
+        elif chg == "Ch":
             drivers.append("Medication Regimen Adjusted")
-        elif row["num_medications"] >= 20:
+        elif med >= 20:
             drivers.append("High Polypharmacy (>20 meds)")
         else:
             drivers.append("Chronic Glycemic / Comorbid Burden")
     return drivers
 
 
-def compute_domain_importance(pipeline: Any) -> pd.DataFrame:
+def compute_score_histogram_bins(scores_arr: np.ndarray, bins: int = 25) -> pd.DataFrame:
+    """
+    Pre-aggregates predicted score probabilities into histogram bins using NumPy.
+    Returns a compact DataFrame (25 rows) suitable for fast Altair rendering without
+    serializing the full cohort across the Streamlit websocket.
+    """
+    if len(scores_arr) == 0:
+        return pd.DataFrame(columns=["bin_start", "bin_end", "count"])
+    counts, bin_edges = np.histogram(scores_arr, bins=bins)
+    return pd.DataFrame({
+        "bin_start": bin_edges[:-1],
+        "bin_end": bin_edges[1:],
+        "count": counts,
+    })
+
+
+@st.cache_data
+def compute_domain_importance(_pipeline: Any) -> pd.DataFrame:
     """
     Computes normalized relative predictive weight (0-100 index) for major clinical
     domains directly from the fitted logistic regression standardized coefficients.
@@ -462,7 +538,7 @@ def format_friendly_feature_name(raw_name: str) -> str:
     """Translates raw preprocessed feature strings into clean clinical descriptors."""
     clean = raw_name.replace("cat__", "").replace("num__", "")
     translations = {
-        "number_inpatient": "Prior Inpatient Admissions (Past Year)",
+        "number_inpatient": "Prior Admissions",
         "number_emergency": "Prior Emergency Room Visits (Past Year)",
         "number_outpatient": "Prior Outpatient Clinic Visits (Past Year)",
         "time_in_hospital": "Length of Inpatient Stay (Days)",
@@ -589,10 +665,11 @@ def main():
             "Terminal encounters (expired/hospice) excluded."
         )
 
-    # Apply age filter if selected with explicit copy to avoid modifying cached state
-    filtered_df = df_scored.copy()
+    # Apply age filter if selected; since df_scored is pre-sorted, filtered_df preserves sorted order
     if selected_ages:
-        filtered_df = filtered_df[filtered_df["age_group"].isin(selected_ages)].copy()
+        filtered_df = df_scored[df_scored["age_group"].isin(selected_ages)]
+    else:
+        filtered_df = df_scored
 
     # Categorize into experimental score tiers (mutually exclusive and exhaustive)
     def assign_score_tier(score: float) -> str:
@@ -603,13 +680,12 @@ def main():
         else:
             return "Lower Score"
 
-    filtered_df["score_tier"] = filtered_df["predicted_score"].apply(assign_score_tier)
-
-    # Counts in tiers
-    n_total = len(filtered_df)
-    n_high = (filtered_df["score_tier"] == "Higher Score").sum()
-    n_mod = (filtered_df["score_tier"] == "Moderate Score").sum()
-    n_low = (filtered_df["score_tier"] == "Lower Score").sum()
+    # Fast vectorized counts using NumPy boolean masks
+    scores = filtered_df["predicted_score"].to_numpy()
+    n_total = len(scores)
+    n_high = int((scores >= high_threshold).sum())
+    n_mod = int(((scores >= mod_threshold) & (scores < high_threshold)).sum())
+    n_low = int((scores < mod_threshold).sum())
 
     # -------------------------------------------------------------------------
     # Top Header Section (Matching Visual Reference Layout)
@@ -738,11 +814,15 @@ def main():
     # TAB 1: High-Priority Outreach Queue (Main View)
     # -------------------------------------------------------------------------
     with tab_queue:
-        # Sort encounters by predicted readmission score descending
-        prioritized_df = filtered_df.sort_values(by="predicted_score", ascending=False).reset_index(drop=True)
-        # Select top encounters up to selected capacity
-        capacity_queue = prioritized_df.head(capacity).copy()
+        # Select top encounters up to selected capacity (pre-sorted order is preserved)
+        capacity_queue = filtered_df.head(capacity).copy()
         capacity_queue["priority_rank"] = range(1, len(capacity_queue) + 1)
+        # Assign score tier only to encounters in the outreach queue (at most capacity rows)
+        capacity_queue["score_tier"] = np.where(
+            capacity_queue["predicted_score"] >= high_threshold,
+            "Higher Score",
+            np.where(capacity_queue["predicted_score"] >= mod_threshold, "Moderate Score", "Lower Score"),
+        )
 
         left_col, right_col = st.columns([1.1, 2.1])
 
@@ -772,22 +852,30 @@ def main():
             st.altair_chart(domain_chart, use_container_width=True)
             st.caption("ℹ️ *Derived dynamically from baseline Logistic Regression standardized coefficients.*")
 
-            # Score Distribution Histogram
+            # Score Distribution Histogram (Optimized with NumPy aggregated bins)
             st.markdown("---")
-            st.markdown("##### 📈 Cohort Score Distribution")
+            st.markdown("##### 📈 Risk Score Distribution")
+            hist_df = compute_score_histogram_bins(scores, bins=25)
             hist_chart = (
-                alt.Chart(filtered_df)
+                alt.Chart(hist_df)
                 .mark_bar(color="#0284C7", opacity=0.85)
                 .encode(
-                    x=alt.X("predicted_score:Q", bin=alt.Bin(maxbins=25), title="Predicted Score Probability"),
-                    y=alt.Y("count()", title="Encounter Count"),
-                    tooltip=["count()"],
+                    x=alt.X("bin_start:Q", bin="binned", title="Predicted Score Probability"),
+                    x2="bin_end:Q",
+                    y=alt.Y("count:Q", title="Encounter Count"),
+                    tooltip=[
+                        alt.Tooltip("bin_start:Q", title="Range Start", format=".2f"),
+                        alt.Tooltip("bin_end:Q", title="Range End", format=".2f"),
+                        alt.Tooltip("count:Q", title="Encounter Count", format=","),
+                    ],
                 )
                 .properties(height=160)
             )
             st.altair_chart(hist_chart, use_container_width=True)
+            mean_score = float(np.mean(scores)) if len(scores) > 0 else 0.0
+            median_score = float(np.median(scores)) if len(scores) > 0 else 0.0
             st.caption(
-                f"Cohort mean score: **{filtered_df['predicted_score'].mean():.3f}** | Median: **{filtered_df['predicted_score'].median():.3f}**"
+                f"Cohort mean score: **{mean_score:.3f}** | Median: **{median_score:.3f}**"
             )
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -827,7 +915,7 @@ def main():
                 "top_driver": "Primary Driver",
                 "age_group": "Age Group",
                 "length_of_stay": "Stay (Days)",
-                "num_inpatient": "Prior Inpatient",
+                "num_inpatient": "Prior Admissions",
             })
 
             st.dataframe(
@@ -837,7 +925,7 @@ def main():
                 height=480,
                 column_config={
                     "Rank": st.column_config.NumberColumn("Rank", width="small"),
-                    "Encounter ID": st.column_config.TextColumn("Encounter ID", width="medium"),
+                    "Encounter ID": st.column_config.TextColumn("Encounter ID", width="small"),
                     "Score (%)": st.column_config.ProgressColumn(
                         "Score (%)",
                         min_value=0,
@@ -845,11 +933,11 @@ def main():
                         format="%.1f%%",
                         width="medium",
                     ),
-                    "Model Tier": st.column_config.TextColumn("Model Tier", width="medium"),
-                    "Primary Driver": st.column_config.TextColumn("Primary Driver", width="large"),
+                    "Model Tier": st.column_config.TextColumn("Model Tier", width="small"),
+                    "Primary Driver": st.column_config.TextColumn("Primary Driver", width="medium"),
                     "Age Group": st.column_config.TextColumn("Age Group", width="small"),
                     "Stay (Days)": st.column_config.NumberColumn("Stay (Days)", width="small"),
-                    "Prior Inpatient": st.column_config.NumberColumn("Prior Inpatient", width="small"),
+                    "Prior Admissions": st.column_config.NumberColumn("Prior Admissions", width="small"),
                 },
             )
 
@@ -884,7 +972,12 @@ def main():
             help="Choose an encounter to audit its clinical profile and model driver breakdown.",
         )
 
-        selected_row = df_scored[df_scored["encounter_label"] == selected_label].iloc[0]
+        match = capacity_queue[capacity_queue["encounter_label"] == selected_label]
+        if not match.empty:
+            selected_row = match.iloc[0]
+        else:
+            selected_row = df_scored[df_scored["encounter_label"] == selected_label].iloc[0]
+
         selected_score = float(selected_row["predicted_score"])
         selected_tier = assign_score_tier(selected_score)
 
@@ -918,7 +1011,7 @@ def main():
         with c2:
             st.markdown("##### 🏥 Hospital Utilization")
             st.write(f"- **Length of Stay**: `{selected_row['length_of_stay']} days`")
-            st.write(f"- **Prior Inpatient Visits (1 yr)**: `{selected_row['num_inpatient']}`")
+            st.write(f"- **Prior Admissions**: `{selected_row['num_inpatient']}`")
             st.write(f"- **Prior ER Visits (1 yr)**: `{selected_row['num_emergency']}`")
             st.write(f"- **Prior Outpatient Visits**: `{selected_row['num_outpatient']}`")
             st.write(f"- **Lab Tests Ordered**: `{selected_row['num_lab_procedures']}`")
