@@ -653,6 +653,9 @@ def _get_scored_cohort_cached(
     # Derive top clinical driver label for quick table scanning (fast array iteration)
     scored_df["top_driver"] = derive_top_driver_labels(scored_df)
 
+    # Separate binary historical outcome field (strictly for retrospective validation; never a feature)
+    scored_df["historical_readmit_30d"] = (cohort_df["readmitted"] == "<30").astype(int).values
+
     # Pre-sort cohort descending by predicted_score once so reruns never re-sort 99k rows
     scored_df = scored_df.sort_values(by="predicted_score", ascending=False).reset_index(drop=True)
 
@@ -927,6 +930,116 @@ def format_primary_diag(diag_val: Any, lang: str = "English") -> str:
     return DIAG_CATEGORY_TRANSLATIONS.get(cat_key, {}).get(lang, cat_key)
 
 
+def check_patient_data_quality(selected_row: pd.Series, lang: str = "English") -> List[Dict[str, str]]:
+    """
+    Performs basic, rule-based data-quality and outlier checks on a single patient record.
+    Checks for:
+      - Missing A1C test record
+      - Missing or unrecorded primary diagnosis
+      - Extreme acute healthcare utilization (inpatient/ER visits)
+      - Extreme length of stay (near or at dataset truncation ceiling)
+      - Extreme medication count (high polypharmacy)
+
+    Note: These are baseline heuristic checks for demo review and do not represent
+    comprehensive clinical data validation or error certification.
+    """
+    warnings_list: List[Dict[str, str]] = []
+
+    def _safe_int(val: Any) -> int:
+        if pd.isna(val) or val is None:
+            return 0
+        try:
+            return max(0, int(val))
+        except (ValueError, TypeError):
+            return 0
+
+    # 1. Missing A1C record
+    a1c_val = str(selected_row.get("a1c_result_display", "")).strip().lower()
+    if a1c_val in ["none", "nan", "", "unknown"]:
+        warnings_list.append({
+            "type": t("dq_type_missing_lab", lang),
+            "text": t("dq_missing_a1c", lang),
+        })
+
+    # 2. Missing Primary Diagnosis
+    diag_val = str(selected_row.get("primary_diag", "")).strip()
+    if diag_val in ["?", "", "nan", "None", "Unknown"]:
+        warnings_list.append({
+            "type": t("dq_type_missing_diag", lang),
+            "text": t("dq_missing_diag", lang),
+        })
+
+    # 3. Extreme Prior Utilization (>= 6 inpatient or >= 6 ER visits)
+    inp = _safe_int(selected_row.get("num_inpatient", 0))
+    emg = _safe_int(selected_row.get("num_emergency", 0))
+    if inp >= 6 or emg >= 6:
+        warnings_list.append({
+            "type": t("dq_type_unusual_util", lang),
+            "text": t("dq_unusual_util", lang, inpatient=inp, emergency=emg),
+        })
+
+    # 4. Extreme Hospital Stay (>= 12 days; dataset truncation is 14)
+    los = _safe_int(selected_row.get("length_of_stay", 0))
+    if los >= 12:
+        warnings_list.append({
+            "type": t("dq_type_unusual_stay", lang),
+            "text": t("dq_unusual_stay", lang, days=los),
+        })
+
+    # 5. Extreme Polypharmacy (>= 35 medications)
+    meds = _safe_int(selected_row.get("num_medications", 0))
+    if meds >= 35:
+        warnings_list.append({
+            "type": t("dq_type_unusual_meds", lang),
+            "text": t("dq_unusual_meds", lang, meds=meds),
+        })
+
+    return warnings_list
+
+
+def compute_retrospective_top_k_metrics(
+    df_scored: pd.DataFrame,
+    k_values: Tuple[int, int] = (10, 20),
+) -> Dict[str, Any]:
+    """
+    Computes retrospective early readmission metrics on historical records (<30d)
+    for the top K1 and top K2 model-ranked encounters.
+
+    Precision@K is defined strictly as:
+        (Historical early readmissions within top K) / K
+    """
+    if "historical_readmit_30d" not in df_scored.columns:
+        return {}
+
+    n_total = len(df_scored)
+    targets = df_scored["historical_readmit_30d"].values
+
+    k1, k2 = k_values
+    actual_k1 = min(k1, n_total)
+    actual_k2 = min(k2, n_total)
+
+    hits_k1 = int(targets[:actual_k1].sum()) if actual_k1 > 0 else 0
+    prec_k1 = float(hits_k1 / actual_k1) if actual_k1 > 0 else 0.0
+
+    hits_k2 = int(targets[:actual_k2].sum()) if actual_k2 > 0 else 0
+    prec_k2 = float(hits_k2 / actual_k2) if actual_k2 > 0 else 0.0
+
+    additional_hits = hits_k2 - hits_k1
+
+    return {
+        "k1": k1,
+        "actual_k1": actual_k1,
+        "hits_k1": hits_k1,
+        "prec_k1": prec_k1,
+        "k2": k2,
+        "actual_k2": actual_k2,
+        "hits_k2": hits_k2,
+        "prec_k2": prec_k2,
+        "additional_hits": additional_hits,
+        "total_cohort": n_total,
+    }
+
+
 def generate_patient_summary(
     selected_row: pd.Series,
     selected_score: float,
@@ -941,7 +1054,7 @@ def generate_patient_summary(
 
     Supports English, Hindi, and Kannada using centralized localized templates.
     Reflects the encounter's actual model score and priority tier using cautious language,
-    distinguishes positive drivers from mitigating/protective factors using local model
+    distinguishes positive drivers from score-lowering factors using local model
     attribution results, and tailors transitional care considerations to recorded data.
 
     Returns:
@@ -1844,6 +1957,52 @@ def main():
             st.caption(t("queue_caption", lang))
             st.markdown("</div>", unsafe_allow_html=True)
 
+            # Retrospective Top-10 vs. Top-20 Capacity Simulation Card
+            retro_stats = compute_retrospective_top_k_metrics(df_scored, k_values=(10, 20))
+            if retro_stats:
+                st.markdown(
+                    f"""
+                    <div class="keel-card" style="margin-top: 1rem;">
+                        <div class="keel-card-title">{t("retro_title", lang)}</div>
+                        <div class="keel-card-subtitle">{t("retro_subtitle", lang)}</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                k1 = retro_stats["actual_k1"]
+                k2 = retro_stats["actual_k2"]
+                h1 = retro_stats["hits_k1"]
+                h2 = retro_stats["hits_k2"]
+                p1 = retro_stats["prec_k1"] * 100
+                p2 = retro_stats["prec_k2"] * 100
+                add_h = retro_stats["additional_hits"]
+
+                retro_table_df = pd.DataFrame([
+                    {
+                        t("retro_col_cohort", lang): t("retro_top_10_label", lang),
+                        t("retro_col_k", lang): k1,
+                        t("retro_col_hits", lang): h1,
+                        t("retro_col_precision", lang): f"{p1:.1f}% ({h1}/{k1})" if k1 > 0 else "N/A",
+                    },
+                    {
+                        t("retro_col_cohort", lang): t("retro_top_20_label", lang),
+                        t("retro_col_k", lang): k2,
+                        t("retro_col_hits", lang): h2,
+                        t("retro_col_precision", lang): f"{p2:.1f}% ({h2}/{k2})" if k2 > 0 else "N/A",
+                    },
+                ])
+                st.table(retro_table_df)
+
+                st.markdown(
+                    f"""
+                    <div style="font-size: 0.85rem; line-height: 1.45; margin-bottom: 0.5rem; color: {'#E2E8F0' if is_dark else '#334155'};">
+                        {t("retro_expansion_summary", lang, additional=add_h, hits_10=h1, hits_20=h2, p10=p1, p20=p2, k1=k1, k2=k2)}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                st.caption(t("retro_disclaimer", lang))
+                st.markdown("</div>", unsafe_allow_html=True)
+
     # -------------------------------------------------------------------------
     # TAB 2: Encounter Clinical Profile & Attribution Deep-Dive
     # -------------------------------------------------------------------------
@@ -1893,6 +2052,27 @@ def main():
             )
         with pcol4:
             st.metric(t("metric_primary_driver", lang), translate_driver_label(selected_row["top_driver"], lang))
+
+        # Cautious Risk-Tier Boundary Review Indicator (Threshold-proximity heuristic only)
+        MARGIN = 0.03  # Documented ±3% score margin around cutoffs (0.40 and 0.70)
+        is_near_high = abs(selected_score - HIGH_RISK_THRESHOLD) <= MARGIN
+        is_near_mod = abs(selected_score - MEDIUM_RISK_THRESHOLD) <= MARGIN
+        if is_near_high or is_near_mod:
+            near_cutoff = HIGH_RISK_THRESHOLD if is_near_high else MEDIUM_RISK_THRESHOLD
+            st.markdown(
+                f"""
+                <div style="margin-top: 0.6rem; margin-bottom: 0.6rem; padding: 0.5rem 0.85rem;
+                            background-color: {'rgba(245, 158, 11, 0.15)' if is_dark else '#FFFBEB'};
+                            border-left: 4px solid #F59E0B; border-radius: 4px; font-size: 0.82rem;
+                            color: {'#FCD34D' if is_dark else '#92400E'};">
+                    <strong>{t('boundary_indicator_near', lang, score=selected_score*100, margin=MARGIN*100, cutoff=near_cutoff)}</strong><br>
+                    <span style="font-size: 0.75rem; color: {'#CBD5E1' if is_dark else '#78350F'};">
+                        {t('boundary_indicator_help', lang)}
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown("---")
 
@@ -1944,6 +2124,41 @@ def main():
         </div>
         """
         st.markdown(summary_card_html, unsafe_allow_html=True)
+
+        # ---------------------------------------------------------------------
+        # Patient Data-Quality & Record Completeness Notice
+        # ---------------------------------------------------------------------
+        dq_flags = check_patient_data_quality(selected_row, lang=lang)
+        if dq_flags:
+            warnings_html = "".join(f"<li><strong>{w['type']}:</strong> {w['text']}</li>" for w in dq_flags)
+            st.markdown(
+                f"""
+                <div style="background-color: {'rgba(245, 158, 11, 0.12)' if is_dark else '#FFFBEB'};
+                            border-left: 4px solid #F59E0B; padding: 0.75rem 1rem; border-radius: 6px; margin: 1rem 0;">
+                    <div style="font-weight: 700; font-size: 0.9rem; color: {'#FBBF24' if is_dark else '#B45309'}; margin-bottom: 0.35rem;">
+                        ⚠️ {t('dq_title', lang)} ({len(dq_flags)})
+                    </div>
+                    <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: {'#E2E8F0' if is_dark else '#1E293B'};">
+                        {warnings_html}
+                    </ul>
+                    <div style="font-size: 0.75rem; color: {'#94A3B8' if is_dark else '#64748B'}; margin-top: 0.4rem;">
+                        {t('dq_disclaimer', lang)}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f"""
+                <div style="background-color: {'rgba(16, 185, 129, 0.10)' if is_dark else '#ECFDF5'};
+                            border-left: 4px solid #10B981; padding: 0.65rem 1rem; border-radius: 6px; margin: 1rem 0;
+                            font-size: 0.85rem; color: {'#A7F3D0' if is_dark else '#065F46'};">
+                    {t('dq_clean', lang)}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown("---")
 

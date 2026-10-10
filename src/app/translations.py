@@ -614,18 +614,18 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
     "attribution_caption": {
         "English": (
             "For this Logistic Regression model, log-odds are linear: $\\text{logit}(p) = \\beta_0 + \\sum \\beta_i x_i$. "
-            "Bars indicate the exact mathematical contribution $(\\beta_i \\cdot x_i)$ of this encounter's features to the predicted probability. "
-            "**Statistical associations do not imply medical causation.**"
+            "Bars indicate the exact mathematical coefficient contributions $(\\beta_i \\cdot x_i)$ of this encounter's preprocessed features to the model's linear score. "
+            "Negative contributions lower this model's score. **These represent observational statistical associations in historical data, not causal medical effects.**"
         ),
         "हिन्दी": (
             "इस लॉजिस्टिक रिग्रेशन मॉडल के लिए, लॉग-ऑड्स रैखिक हैं: $\\text{logit}(p) = \\beta_0 + \\sum \\beta_i x_i$। "
-            "बार अनुमानित संभावना में इस एनकाउंटर की विशेषताओं के सटीक गणितीय योगदान $(\\beta_i \\cdot x_i)$ को दर्शाते हैं। "
-            "**सांख्यिकीय संबंध चिकित्सीय कार्य-कारण का संकेत नहीं देते हैं।**"
+            "बार मॉडल के रैखिक स्कोर में इस एनकाउंटर की पूर्व-संसाधित विशेषताओं के सटीक गणितीय गुणांक योगदान $(\\beta_i \\cdot x_i)$ को दर्शाते हैं। "
+            "नकारात्मक योगदान इस मॉडल के स्कोर को कम करते हैं। **ये ऐतिहासिक डेटा में अवलोकनात्मक सांख्यिकीय संबंधों का प्रतिनिधित्व करते हैं, चिकित्सीय कार्य-कारण का नहीं।**"
         ),
         "ಕನ್ನಡ": (
             "ಈ ಲಾಜಿಸ್ಟಿಕ್ ರಿಗ್ರೆಷನ್ ಮಾದರಿಗೆ, ಲಾಗ್-ಆಡ್ಸ್ ರೇಖೀಯವಾಗಿದೆ: $\\text{logit}(p) = \\beta_0 + \\sum \\beta_i x_i$. "
-            "ಗ್ರಾಫ್‌ಗಳು ಅಂದಾಜು ಸಂಭವನೀಯತೆಗೆ ಈ ದಾಖಲಾತಿಯ ವೈಶಿಷ್ಟ್ಯಗಳ ನಿಖರವಾದ ಗಣಿತದ ಕೊಡುಗೆಯನ್ನು $(\\beta_i \\cdot x_i)$ ಸೂಚಿಸುತ್ತವೆ. "
-            "**ಸಂಖ್ಯಾಶಾಸ್ತ್ರೀಯ ಸಂಬಂಧಗಳು ವೈದ್ಯಕೀಯ ಕಾರಣವನ್ನು ಸೂಚಿಸುವುದಿಲ್ಲ.**"
+            "ಗ್ರಾಫ್‌ಗಳು ಮಾದರಿಯ ರೇಖೀಯ ಸ್ಕೋರಿಗೆ ಈ ದಾಖಲಾತಿಯ ಪೂರ್ವ-ಸಂಸ್ಕರಿಸಿದ ವೈಶಿಷ್ಟ್ಯಗಳ ನಿಖರವಾದ ಗಣಿತದ ಗುಣಾಂಕ ಕೊಡುಗೆಗಳನ್ನು $(\\beta_i \\cdot x_i)$ ಸೂಚಿಸುತ್ತವೆ. "
+            "ಋಣಾತ್ಮಕ ಕೊಡುಗೆಗಳು ಈ ಮಾದರಿಯ ಸ್ಕೋರ್ ಅನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತವೆ. **ಇವು ಐತಿಹಾಸಿಕ ಡೇಟಾದಲ್ಲಿನ ವೀಕ್ಷಣಾ ಸಂಖ್ಯಾಶಾಸ್ತ್ರೀಯ ಸಂಬಂಧಗಳನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತವೆ, ವೈದ್ಯಕೀಯ ಕಾರಣಗಳನ್ನಲ್ಲ.**"
         ),
     },
     "pos_drivers_title": {
@@ -644,25 +644,162 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
         "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಗೆ ಯಾವುದೇ ಪ್ರಮುಖ ಧನಾತ್ಮಕ ಅಪಾಯದ ಅಂಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
     },
     "neg_drivers_title": {
-        "English": "##### 🔻 Top Risk-Reducing Factors $(\\beta_i x_i < 0)$",
-        "हिन्दी": "##### 🔻 शीर्ष जोखिम कम करने वाले कारक $(\\beta_i x_i < 0)$",
-        "ಕನ್ನಡ": "##### 🔻 ಅಪಾಯ ಕಡಿಮೆ ಮಾಡುವ ಪ್ರಮುಖ ಅಂಶಗಳು $(\\beta_i x_i < 0)$",
+        "English": "##### 🔻 Top Score-Lowering Factors $(\\beta_i x_i < 0)$",
+        "हिन्दी": "##### 🔻 शीर्ष स्कोर घटाने वाले कारक $(\\beta_i x_i < 0)$",
+        "ಕನ್ನಡ": "##### 🔻 ಸ್ಕೋರ್ ಕಡಿಮೆ ಮಾಡುವ ಪ್ರಮುಖ ಅಂಶಗಳು $(\\beta_i x_i < 0)$",
     },
     "neg_chart_xaxis": {
-        "English": "Negative Log-Odds Impact (Protective)",
-        "हिन्दी": "नकारात्मक लॉग-ऑड्स प्रभाव (सुरक्षात्मक)",
-        "ಕನ್ನಡ": "ಋಣಾತ್ಮಕ ಲಾಗ್-ಆಡ್ಸ್ ಪ್ರಭಾವ (ರಕ್ಷಣಾತ್ಮಕ)",
+        "English": "Score-Lowering Log-Odds Contribution $(\\beta_i x_i < 0)$",
+        "हिन्दी": "स्कोर घटाने वाला लॉग-ऑड्स योगदान $(\\beta_i x_i < 0)$",
+        "ಕನ್ನಡ": "ಸ್ಕೋರ್ ಕಡಿಮೆ ಮಾಡುವ ಲಾಗ್-ಆಡ್ಸ್ ಕೊಡುಗೆ $(\\beta_i x_i < 0)$",
     },
     "neg_empty_state": {
-        "English": "No significant protective factors identified for this encounter.",
-        "हिन्दी": "इस एनकाउंटर के लिए कोई महत्वपूर्ण सुरक्षात्मक कारक नहीं पाया गया।",
-        "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಗೆ ಯಾವುದೇ ಪ್ರಮುಖ ರಕ್ಷಣಾತ್ಮಕ ಅಂಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+        "English": "No significant score-lowering factors identified for this encounter.",
+        "हिन्दी": "इस एनकाउंटर के लिए कोई महत्वपूर्ण स्कोर घटाने वाला कारक नहीं पाया गया।",
+        "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಗೆ ಯಾವುದೇ ಪ್ರಮುಖ ಸ್ಕೋರ್ ಕಡಿಮೆ ಮಾಡುವ ಅಂಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
     },
     "intercept_caption": {
         "English": "Base model intercept $(\\beta_0)$: `{val:.3f}`",
         "हिन्दी": "बेस मॉडल इंटरसेप्ट $(\\beta_0)$: `{val:.3f}`",
         "ಕನ್ನಡ": "ಮೂಲ ಮಾದರಿಯ ಇಂಟರ್‌ಸೆಪ್ಟ್ $(\\beta_0)$: `{val:.3f}`",
     },
+
+    # Patient Data-Quality Notice
+    "dq_title": {
+        "English": "Patient Data-Quality & Record Completeness Notice",
+        "हिन्दी": "रोगी डेटा-गुणवत्ता और रिकॉर्ड पूर्णता सूचना",
+        "ಕನ್ನಡ": "ರೋಗಿ ಡೇಟಾ-ಗುಣಮಟ್ಟ ಮತ್ತು ದಾಖಲೆಯ ಸಂಪೂರ್ಣತೆಯ ಸೂಚನೆ",
+    },
+    "dq_clean": {
+        "English": "✅ No data-quality anomalies detected by basic baseline checks (HbA1c, primary diagnosis, and acute utilization bounds). Note: Basic heuristic checks do not guarantee clinical completeness.",
+        "हिन्दी": "✅ बुनियादी आधारभूत जांचों (HbA1c, प्राथमिक निदान, और तीव्र उपयोग सीमाओं) द्वारा कोई डेटा-गुणवत्ता विसंगति नहीं पाई गई। नोट: बुनियादी हेयूरिस्टिक जांच नैदानिक पूर्णता की गारंटी नहीं देती है।",
+        "ಕನ್ನಡ": "✅ ಮೂಲಭೂತ ತಪಾಸಣೆಗಳಿಂದ (HbA1c, ಪ್ರಾಥಮಿಕ ರೋಗನಿರ್ಣಯ, ಮತ್ತು ತೀವ್ರ ಬಳಕೆಯ ಮಿತಿಗಳು) ಯಾವುದೇ ಡೇಟಾ ಗುಣಮಟ್ಟದ ದೋಷಗಳು ಕಂಡುಬಂದಿಲ್ಲ. ಸೂಚನೆ: ಮೂಲಭೂತ ನಿಯಮ ತಪಾಸಣೆಗಳು ವೈದ್ಯಕೀಯ ಸಂಪೂರ್ಣತೆಯನ್ನು ಖಚಿತಪಡಿಸುವುದಿಲ್ಲ.",
+    },
+    "dq_disclaimer": {
+        "English": "Heuristic data-quality check for demo review; does not constitute automated clinical validation or error certification.",
+        "हिन्दी": "डेमो समीक्षा के लिए हेयूरिस्टिक डेटा-गुणवत्ता जांच; यह स्वचालित नैदानिक सत्यापन या त्रुटि प्रमाणीकरण नहीं है।",
+        "ಕನ್ನಡ": "ಡೆಮೊ ಪರಿಶೀಲನೆಗಾಗಿ ನಿಯಮ-ಆಧಾರಿತ ಡೇಟಾ ಗುಣಮಟ್ಟದ ತಪಾಸಣೆ; ಇದು ಸ್ವಯಂಚಾಲಿತ ವೈದ್ಯಕೀಯ ಮೌಲ್ಯೀಕರಣವನ್ನು ಪ್ರತಿನಿಧಿಸುವುದಿಲ್ಲ.",
+    },
+    "dq_type_missing_lab": {
+        "English": "Missing Clinical Record",
+        "हिन्दी": "लापता नैदानिक रिकॉर्ड",
+        "ಕನ್ನಡ": "ದಾಖಲಾಗದ ಕ್ಲಿನಿಕಲ್ ದಾಖಲೆ",
+    },
+    "dq_missing_a1c": {
+        "English": "HbA1c glycemic control test was not documented during this hospitalization.",
+        "हिन्दी": "इस अस्पताल में भर्ती के दौरान HbA1c ग्लाइसेमिक नियंत्रण परीक्षण दर्ज नहीं किया गया था।",
+        "ಕನ್ನಡ": "ಈ ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿಯ ಸಮಯದಲ್ಲಿ HbA1c ಗ್ಲೈಸೆಮಿಕ್ ನಿಯಂತ್ರಣ ಪರೀಕ್ಷೆಯನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
+    },
+    "dq_type_missing_diag": {
+        "English": "Missing Clinical Record",
+        "हिन्दी": "लापता नैदानिक रिकॉर्ड",
+        "ಕನ್ನಡ": "ದಾಖಲಾಗದ ಕ್ಲಿನಿಕಲ್ ದಾಖಲೆ",
+    },
+    "dq_missing_diag": {
+        "English": "Primary admission diagnosis code is unrecorded ('?').",
+        "हिन्दी": "प्राथमिक प्रवेश निदान कोड दर्ज नहीं है ('?')।",
+        "ಕನ್ನಡ": "ಪ್ರಾಥಮಿಕ ದಾಖಲಾತಿ ರೋಗನಿರ್ಣಯ ಕೋಡ್ ದಾಖಲಾಗಿಲ್ಲ ('?').",
+    },
+    "dq_type_unusual_util": {
+        "English": "Unusual value; review record",
+        "हिन्दी": "असामान्य मान; रिकॉर्ड की समीक्षा करें",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ಮೌಲ್ಯ; ದಾಖಲೆಯನ್ನು ಪರಿಶೀಲಿಸಿ",
+    },
+    "dq_unusual_util": {
+        "English": "Unusual acute utilization ({inpatient} prior admissions, {emergency} ER visits in past year).",
+        "हिन्दी": "असामान्य तीव्र उपयोग (पिछले वर्ष में {inpatient} पूर्व दाखिले, {emergency} आपातकालीन दौरे)।",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ತೀವ್ರ ಬಳಕೆ (ಕಳೆದ ವರ್ಷದಲ್ಲಿ {inpatient} ಹಿಂದಿನ ದಾಖಲಾತಿಗಳು, {emergency} ತುರ್ತು ಭೇಟಿಗಳು).",
+    },
+    "dq_type_unusual_stay": {
+        "English": "Unusual value; review record",
+        "हिन्दी": "असामान्य मान; रिकॉर्ड की समीक्षा करें",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ಮೌಲ್ಯ; ದಾಖಲೆಯನ್ನು ಪರಿಶೀಲಿಸಿ",
+    },
+    "dq_unusual_stay": {
+        "English": "Unusual hospital stay duration ({days} days; dataset ceiling is 14 days).",
+        "हिन्दी": "असामान्य अस्पताल प्रवास अवधि ({days} दिन; डेटासेट की अधिकतम सीमा 14 दिन है)।",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ಆಸ್ಪತ್ರೆ ವಾಸ್ತವ್ಯದ ಅವಧಿ ({days} ದಿನಗಳು; ಡೇಟಾಸೆಟ್ ಗರಿಷ್ಠ ಮಿತಿ 14 ದಿನಗಳು).",
+    },
+    "dq_type_unusual_meds": {
+        "English": "Unusual value; review record",
+        "हिन्दी": "असामान्य मान; रिकॉर्ड की समीक्षा करें",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ಮೌಲ್ಯ; ದಾಖಲೆಯನ್ನು ಪರಿಶೀಲಿಸಿ",
+    },
+    "dq_unusual_meds": {
+        "English": "Unusual medication count ({meds} medications administered).",
+        "हिन्दी": "असामान्य दवा मात्रा ({meds} दवाएं दी गईं)।",
+        "ಕನ್ನಡ": "ಅಸಾಮಾನ್ಯ ಔಷಧಿ ಪ್ರಮಾಣ ({meds} ಔಷಧಿಗಳನ್ನು ನೀಡಲಾಗಿದೆ).",
+    },
+
+    # Risk-Tier Boundary Indicator
+    "boundary_indicator_near": {
+        "English": "⚠️ Near risk-tier boundary ({score:.1f}% is within ±{margin:.1f}% of {cutoff:.2f} cutoff)",
+        "हिन्दी": "⚠️ जोखिम-टियर सीमा के निकट ({score:.1f}% कटऑफ {cutoff:.2f} के ±{margin:.1f}% के भीतर है)",
+        "ಕನ್ನಡ": "⚠️ ಅಪಾಯದ ಹಂತದ ಗಡಿಯ ಸಮೀಪ ({score:.1f}% ಕಟ್‌ಆಫ್ {cutoff:.2f} ರ ±{margin:.1f}% ಒಳಗೆ ಇದೆ)",
+    },
+    "boundary_indicator_help": {
+        "English": "Threshold-proximity heuristic: This encounter's estimated score is close to a triage cutoff (0.40 or 0.70). This is a simple boundary proximity indicator, NOT a measure of statistical uncertainty, confidence interval, or calibration.",
+        "हिन्दी": "सीमा-निकटता हेयूरिस्टिक: इस एनकाउंटर का अनुमानित स्कोर ट्राइएज कटऑफ (0.40 या 0.70) के करीब है। यह केवल एक सीमा-निकटता हेयूरिस्टिक है, सांख्यिकीय अनिश्चितता अनुमान, विश्वास अंतराल या अंशांकन मीट्रिक नहीं है।",
+        "ಕನ್ನಡ": "ಮಿತಿ-ಸಮೀಪದ ನಿಯಮ: ಈ ದಾಖಲಾತಿಯ ಅಂದಾಜು ಸ್ಕೋರ್ ವರ್ಗೀಕರಣದ ಕಟ್‌ಆಫ್ (0.40 ಅಥವಾ 0.70) ಹತ್ತಿರದಲ್ಲಿದೆ. ಇದು ಕೇವಲ ಮಿತಿ-ಸಾಮೀಪ್ಯ ನಿಯಮವಾಗಿದೆ, ಸಂಖ್ಯಾಶಾಸ್ತ್ರೀಯ ಅನಿಶ್ಚಿತತೆ, ವಿಶ್ವಾಸಾರ್ಹತೆಯ ಮಧ್ಯಂತರ ಅಥವಾ ಮಾಪನಾಂಕ ನಿರ್ಣಯವಲ್ಲ.",
+    },
+    "boundary_indicator_comfortable": {
+        "English": "Score is comfortably within tier bounds",
+        "हिन्दी": "स्कोर टियर सीमाओं के भीतर सुरक्षित रूप से स्थित है",
+        "ಕನ್ನಡ": "ಸ್ಕೋರ್ ಹಂತದ ಮಿತಿಗಳ ಒಳಗೆ ಸಮರ್ಪಕವಾಗಿದೆ",
+    },
+
+    # Retrospective Top-10 vs Top-20 Capacity Simulation
+    "retro_title": {
+        "English": "📊 Retrospective Capacity Simulation: Top 10 vs. Top 20 (Historical Records)",
+        "हिन्दी": "📊 पूर्वव्यापी क्षमता सिमुलेशन: शीर्ष 10 बनाम शीर्ष 20 (ऐतिहासिक रिकॉर्ड)",
+        "ಕನ್ನಡ": "📊 ಹಿಂದಿನ ಸಾಮರ್ಥ್ಯ ಸಿಮ್ಯುಲೇಶನ್: ಅಗ್ರ 10 ವಿರುದ್ಧ ಅಗ್ರ 20 (ಐತಿಹಾಸಿಕ ದಾಖಲೆಗಳು)",
+    },
+    "retro_subtitle": {
+        "English": "Retrospective evaluation on historical dataset records (<30d readmissions). This section reflects historical data evaluation only, NOT prospective clinical performance.",
+        "हिन्दी": "ऐतिहासिक डेटासेट रिकॉर्ड (<30 दिन पुनः भर्ती) पर पूर्वव्यापी मूल्यांकन। यह अनुभाग केवल ऐतिहासिक डेटा मूल्यांकन को दर्शाता है, संभावित नैदानिक प्रदर्शन को नहीं।",
+        "ಕನ್ನಡ": "ಐತಿಹಾಸಿಕ ಡೇಟಾಸೆಟ್ ದಾಖಲೆಗಳ (<30 ದಿನಗಳ ಮರುದಾಖಲಾತಿಗಳು) ಮೇಲಿನ ಹಿಂದಿನ ಮೌಲ್ಯಮಾಪನ. ಈ ವಿಭಾಗವು ಕೇವಲ ಐತಿಹಾಸಿಕ ಡೇಟಾ ಮೌಲ್ಯಮಾಪನವನ್ನು ಪ್ರತಿಬಿಂಬಿಸುತ್ತದೆ, ಭವಿಷ್ಯದ ವೈದ್ಯಕೀಯ ಫಲಿತಾಂಶವನ್ನಲ್ಲ.",
+    },
+    "retro_col_cohort": {
+        "English": "Outreach Cohort",
+        "हिन्दी": "आउटरीच समूह",
+        "ಕನ್ನಡ": "ಔಟ್‌ರೀಚ್ ಗುಂಪು",
+    },
+    "retro_col_k": {
+        "English": "Capacity (K)",
+        "हिन्दी": "क्षमता (K)",
+        "ಕನ್ನಡ": "ಸಾಮರ್ಥ್ಯ (K)",
+    },
+    "retro_col_hits": {
+        "English": "Historical Early Readmissions (<30d)",
+        "हिन्दी": "ऐतिहासिक प्रारंभिक पुनः भर्तियां (<30 दिन)",
+        "ಕನ್ನಡ": "ಐತಿಹಾಸಿಕ ಆರಂಭಿಕ ಮರುದಾಖಲಾತಿಗಳು (<30 ದಿನ)",
+    },
+    "retro_col_precision": {
+        "English": "Precision@K (Historical Readmissions / K)",
+        "हिन्दी": "Precision@K (ऐतिहासिक पुनः भर्तियां / K)",
+        "ಕನ್ನಡ": "Precision@K (ಐತಿಹಾಸಿಕ ಮರುದಾಖಲಾತಿಗಳು / K)",
+    },
+    "retro_top_10_label": {
+        "English": "Top 10 Encounters",
+        "हिन्दी": "शीर्ष 10 एनकाउंटर",
+        "ಕನ್ನಡ": "ಅಗ್ರ 10 ದಾಖಲಾತಿಗಳು",
+    },
+    "retro_top_20_label": {
+        "English": "Top 20 Encounters",
+        "हिन्दी": "शीर्ष 20 एनकाउंटर",
+        "ಕನ್ನಡ": "ಅಗ್ರ 20 ದಾಖಲಾತಿಗಳು",
+    },
+    "retro_expansion_summary": {
+        "English": "Expanding outreach from Top 10 to Top 20 encounters identifies **{additional} additional** historical early readmissions (from {hits_10} to {hits_20}). Precision@10: **{p10:.1f}%** ({hits_10}/{k1}) → Precision@20: **{p20:.1f}%** ({hits_20}/{k2}).",
+        "हिन्दी": "आउटरीच को शीर्ष 10 से शीर्ष 20 एनकाउंटर तक विस्तारित करने पर **{additional} अतिरिक्त** ऐतिहासिक प्रारंभिक पुनः भर्तियों की पहचान होती है ({hits_10} से {hits_20})। Precision@10: **{p10:.1f}%** ({hits_10}/{k1}) → Precision@20: **{p20:.1f}%** ({hits_20}/{k2})।",
+        "ಕನ್ನಡ": "ಔಟ್‌ರೀಚ್ ಅನ್ನು ಅಗ್ರ 10 ರಿಂದ ಅಗ್ರ 20 ದಾಖಲಾತಿಗಳಿಗೆ ವಿಸ್ತರಿಸುವುದರಿಂದ **{additional} ಹೆಚ್ಚುವರಿ** ಐತಿಹಾಸಿಕ ಆರಂಭಿಕ ಮರುದಾಖಲಾತಿಗಳನ್ನು ಗುರುತಿಸುತ್ತದೆ ({hits_10} ರಿಂದ {hits_20})। Precision@10: **{p10:.1f}%** ({hits_10}/{k1}) → Precision@20: **{p20:.1f}%** ({hits_20}/{k2}).",
+    },
+    "retro_disclaimer": {
+        "English": "⚠️ Retrospective evaluation on historical records. Precision@K is defined as historical early readmissions (<30d) divided by K. In live prospective clinical care, future readmissions are unknown at discharge.",
+        "हिन्दी": "⚠️ ऐतिहासिक रिकॉर्ड पर पूर्वव्यापी मूल्यांकन। Precision@K को ऐतिहासिक प्रारंभिक पुनः भर्ती (<30 दिन) को K से विभाजित करके परिभाषित किया गया है। वास्तविक संभावित नैदानिक देखभाल में, डिस्चार्ज के समय भविष्य की पुनः भर्तियां अज्ञात होती हैं।",
+        "ಕನ್ನಡ": "⚠️ ಐತಿಹಾಸಿಕ ದಾಖಲೆಗಳ ಮೇಲಿನ ಹಿಂದಿನ ಮೌಲ್ಯಮಾಪನ. Precision@K ಅನ್ನು ಐತಿಹಾಸಿಕ ಆರಂಭಿಕ ಮರುದಾಖಲಾತಿಗಳನ್ನು (<30 ದಿನ) K ನಿಂದ ಭಾಗಿಸಿ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ. ಭವಿಷ್ಯದ ನೈಜ ವೈದ್ಯಕೀಯ ಆರೈಕೆಯಲ್ಲಿ, ಡಿಸ್ಚಾರ್ಜ್ ಸಮಯದಲ್ಲಿ ಭವಿಷ್ಯದ ಮರುದಾಖಲಾತಿಗಳು ತಿಳಿದಿರುವುದಿಲ್ಲ.",
+    },
+
 
     # Tab 3: Model Diagnostics & Cohort Provenance
     "card_diagnostics_title": {
@@ -1208,9 +1345,9 @@ SUMMARY_CONTEXT_SENTENCE = {
         "ಕನ್ನಡ": "ಈ ಸ್ಕೋರ್ ಸಮತೋಲಿತ ವಿವರವನ್ನು ಪ್ರತಿಬಿಂಬಿಸುತ್ತದೆ, ಇಲ್ಲಿ ಹಿಂದಿನ ಯಾವುದೇ ತುರ್ತು ಆರೈಕೆ ಬಳಕೆ ಇಲ್ಲದಿರುವುದು ಆಸ್ಪತ್ರೆಯ ಅಂಶಗಳನ್ನು ಸಮತೋಲನಗೊಳಿಸುತ್ತದೆ.",
     },
     "zero_util_low": {
-        "English": "The model identified predominantly protective indicators, led by zero recorded prior acute admissions and stable clinical features.",
-        "हिन्दी": "मॉडल ने मुख्य रूप से सुरक्षात्मक संकेतकों की पहचान की है, जिसमें शून्य पूर्व दाखिले और स्थिर नैदानिक विशेषताएं प्रमुख हैं।",
-        "ಕನ್ನಡ": "ಮಾದರಿಯು ಮುಖ್ಯವಾಗಿ ರಕ್ಷಣಾತ್ಮಕ ಅಂಶಗಳನ್ನು ಗುರುತಿಸಿದೆ, ಇದರಲ್ಲಿ ಹಿಂದಿನ ಶೂನ್ಯ ದಾಖಲಾತಿಗಳು ಮತ್ತು ಸ್ಥಿರ ಕ್ಲಿನಿಕಲ್ ಲಕ್ಷಣಗಳು ಸೇರಿವೆ.",
+        "English": "The model identified predominantly score-lowering indicators, led by zero recorded prior acute admissions and stable clinical features.",
+        "हिन्दी": "मॉडल ने मुख्य रूप से स्कोर घटाने वाले संकेतकों की पहचान की है, जिसमें शून्य पूर्व दाखिले और स्थिर नैदानिक विशेषताएं प्रमुख हैं।",
+        "ಕನ್ನಡ": "ಮಾದರಿಯು ಮುಖ್ಯವಾಗಿ ಸ್ಕೋರ್ ಕಡಿಮೆ ಮಾಡುವ ಅಂಶಗಳನ್ನು ಗುರುತಿಸಿದೆ, ಇದರಲ್ಲಿ ಹಿಂದಿನ ಶೂನ್ಯ ದಾಖಲಾತಿಗಳು ಮತ್ತು ಸ್ಥಿರ ಕ್ಲಿನಿಕಲ್ ಲಕ್ಷಣಗಳು ಸೇರಿವೆ.",
     },
 }
 
