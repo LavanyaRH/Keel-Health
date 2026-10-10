@@ -1,0 +1,43 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# Data & Models
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/diabetic_data.csv
+data/processed/*
+!data/processed/.gitkeep
+
+# Model artifacts
+*.pkl
+*.joblib
+*.onnx
+models/saved/*.joblib
+models/saved/*.pkl
+models/saved/*.onnx
+!models/saved/baseline_logistic_regression.joblib
+
+# Streamlit specific
+.streamlit/secrets.toml
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+scratch/
+!data/raw/diabetic_data.csv
+!models/saved/baseline_logistic_regression.joblib

@@ -1,0 +1,165 @@
+{
+  "model_type": "LogisticRegression",
+  "hyperparameters": {
+    "penalty": "l2",
+    "C": 1.0,
+    "class_weight": "balanced",
+    "solver": "lbfgs",
+    "max_iter": 1000,
+    "random_state": 42
+  },
+  "created_at_utc": "2026-10-09T00:42:49.833870+00:00",
+  "dataset_metadata": {
+    "raw_shape": [
+      101766,
+      50
+    ],
+    "cohort_shape": [
+      99343,
+      50
+    ],
+    "terminal_excluded": true,
+    "terminal_encounters_count": 2423,
+    "random_state": 42,
+    "test_size": 0.2,
+    "train_rows": 79541,
+    "test_rows": 19802,
+    "train_unique_patients": 55992,
+    "test_unique_patients": 13998,
+    "train_positive_count": 9098,
+    "train_positive_rate": 0.1144,
+    "test_positive_count": 2216,
+    "test_positive_rate": 0.1119,
+    "numerical_features_count": 8,
+    "categorical_features_count": 33,
+    "total_selected_features_count": 41,
+    "include_discharge_disposition": false,
+    "excluded_features": {
+      "encounter_id": "Primary key identifier (100% unique per row, memorization hazard).",
+      "patient_nbr": "Patient identifier (leakage hazard; reserved exclusively as group split key).",
+      "readmitted": "Target variable (separated as y label).",
+      "weight": "Extremely high missingness (96.86% '?'). Imputing would create severe artificial noise.",
+      "payer_code": "High missingness (39.56% '?') and administrative billing code with no clinical physiological relevance.",
+      "medical_specialty": "High missingness (49.08% '?') and high cardinality (73 categories). Blind imputation introduces substantial noise.",
+      "examide": "Zero variance / constant feature (100% 'No').",
+      "citoglipton": "Zero variance / constant feature (100% 'No').",
+      "discharge_disposition_id": "Excluded from baseline features to prevent post-prediction timing leakage and intervention confounding. Discharge disposition is only determined at final discharge and reflects care interventions (e.g. SNF, Home Health), making it unavailable during earlier inpatient stay decision points."
+    }
+  },
+  "metrics_summary": {
+    "roc_auc": 0.6393,
+    "pr_auc": 0.1978,
+    "precision": 0.1693,
+    "recall": 0.5293,
+    "f1_score": 0.2566,
+    "specificity": 0.6728,
+    "accuracy": 0.6567
+  },
+  "top_features": {
+    "top_risk_increasing_features": [
+      {
+        "feature": "cat__diag_1_Missing",
+        "coefficient": 0.6308,
+        "odds_ratio": 1.8791
+      },
+      {
+        "feature": "cat__repaglinide_Up",
+        "coefficient": 0.4357,
+        "odds_ratio": 1.546
+      },
+      {
+        "feature": "cat__acarbose_Up",
+        "coefficient": 0.4333,
+        "odds_ratio": 1.5423
+      },
+      {
+        "feature": "cat__age_[80-90)",
+        "coefficient": 0.3767,
+        "odds_ratio": 1.4574
+      },
+      {
+        "feature": "cat__admission_source_id_3",
+        "coefficient": 0.3765,
+        "odds_ratio": 1.4572
+      },
+      {
+        "feature": "num__number_inpatient",
+        "coefficient": 0.3592,
+        "odds_ratio": 1.4321
+      },
+      {
+        "feature": "cat__admission_source_id_20",
+        "coefficient": 0.3573,
+        "odds_ratio": 1.4295
+      },
+      {
+        "feature": "cat__age_[70-80)",
+        "coefficient": 0.3359,
+        "odds_ratio": 1.3992
+      },
+      {
+        "feature": "cat__age_[90-100)",
+        "coefficient": 0.3253,
+        "odds_ratio": 1.3844
+      },
+      {
+        "feature": "cat__admission_source_id_8",
+        "coefficient": 0.2893,
+        "odds_ratio": 1.3355
+      }
+    ],
+    "top_risk_reducing_features": [
+      {
+        "feature": "cat__age_[0-10)",
+        "coefficient": -1.4888,
+        "odds_ratio": 0.2257
+      },
+      {
+        "feature": "cat__repaglinide_Down",
+        "coefficient": -0.7575,
+        "odds_ratio": 0.4688
+      },
+      {
+        "feature": "cat__admission_type_id_7",
+        "coefficient": -0.6042,
+        "odds_ratio": 0.5465
+      },
+      {
+        "feature": "cat__rosiglitazone_Down",
+        "coefficient": -0.4844,
+        "odds_ratio": 0.6161
+      },
+      {
+        "feature": "cat__nateglinide_Up",
+        "coefficient": -0.4481,
+        "odds_ratio": 0.6388
+      },
+      {
+        "feature": "cat__acarbose_Steady",
+        "coefficient": -0.4449,
+        "odds_ratio": 0.6409
+      },
+      {
+        "feature": "cat__age_[10-20)",
+        "coefficient": -0.4181,
+        "odds_ratio": 0.6583
+      },
+      {
+        "feature": "cat__admission_source_id_10",
+        "coefficient": -0.3237,
+        "odds_ratio": 0.7235
+      },
+      {
+        "feature": "cat__diag_1_Respiratory",
+        "coefficient": -0.2703,
+        "odds_ratio": 0.7631
+      },
+      {
+        "feature": "cat__chlorpropamide_Steady",
+        "coefficient": -0.2629,
+        "odds_ratio": 0.7688
+      }
+    ]
+  },
+  "disclaimer": "Research prototype using historical diabetes encounters; not a clinically validated medical prediction system. No claims of clinical effectiveness."
+}
