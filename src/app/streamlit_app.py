@@ -519,12 +519,57 @@ def apply_chart_theme(chart: alt.Chart, is_dark: bool) -> alt.Chart:
     )
 
 
-# Initialize language & theme state (Defaults: English, Light Mode)
+def render_chart_data_toggle(key: str, lang: str = "English") -> str:
+    """
+    Renders an explicit, visible, reversible Graph / Data toggle for charts.
+    Uses canonical string keys ('graph', 'data') to ensure stability across
+    language changes without throwing Streamlit option value exceptions.
+    """
+    label_map = {
+        "graph": f"📊 {t('btn_graph', lang)}",
+        "data": f"📋 {t('btn_data', lang)}",
+    }
+    if hasattr(st, "segmented_control"):
+        mode = st.segmented_control(
+            label=t("lbl_view_mode", lang),
+            options=["graph", "data"],
+            default="graph",
+            format_func=lambda x: label_map.get(x, x),
+            key=key,
+            label_visibility="collapsed",
+        )
+        return mode or "graph"
+    else:
+        mode = st.radio(
+            label=t("lbl_view_mode", lang),
+            options=["graph", "data"],
+            index=0,
+            horizontal=True,
+            format_func=lambda x: label_map.get(x, x),
+            key=key,
+            label_visibility="collapsed",
+        )
+        return mode or "graph"
+
+
+# -----------------------------------------------------------------------------
+# Preferences & Query Parameters Initialization (Persist across browser refresh)
+# -----------------------------------------------------------------------------
+LANG_PARAM_MAP = {
+    "english": "English", "en": "English",
+    "हिन्दी": "हिन्दी", "hindi": "हिन्दी", "hi": "हिन्दी",
+    "ಕನ್ನಡ": "ಕನ್ನಡ", "kannada": "ಕನ್ನಡ", "kn": "ಕನ್ನಡ",
+}
+
 if "language" not in st.session_state:
-    st.session_state["language"] = "English"
+    raw_lang = str(st.query_params.get("lang", "")).strip().lower()
+    restored_lang = LANG_PARAM_MAP.get(raw_lang, "English")
+    st.session_state["language"] = restored_lang
 
 if "theme" not in st.session_state:
-    st.session_state["theme"] = "Light Mode"
+    raw_theme = str(st.query_params.get("theme", "")).strip().lower()
+    restored_theme = "Dark Mode" if raw_theme in ["dark", "dark mode"] else "Light Mode"
+    st.session_state["theme"] = restored_theme
 
 if "dark_mode_toggle" not in st.session_state:
     st.session_state["dark_mode_toggle"] = (st.session_state["theme"] == "Dark Mode")
@@ -737,12 +782,15 @@ def compute_score_histogram_bins(scores_arr: np.ndarray, bins: int = 25) -> pd.D
     serializing the full cohort across the Streamlit websocket.
     """
     if len(scores_arr) == 0:
-        return pd.DataFrame(columns=["bin_start", "bin_end", "count"])
+        return pd.DataFrame(columns=["bin_start", "bin_end", "count", "pct"])
     counts, bin_edges = np.histogram(scores_arr, bins=bins)
+    total = len(scores_arr)
+    pcts = (counts / total * 100.0) if total > 0 else np.zeros_like(counts, dtype=float)
     return pd.DataFrame({
         "bin_start": bin_edges[:-1],
         "bin_end": bin_edges[1:],
         "count": counts,
+        "pct": pcts,
     })
 
 
@@ -1575,9 +1623,12 @@ def main():
         selected_canonical = LANG_TO_CODE.get(selected_display, "English")
         if selected_canonical != canonical_lang:
             st.session_state["language"] = selected_canonical
+            st.query_params["lang"] = selected_canonical
             st.rerun()
 
         lang = selected_canonical
+        if st.query_params.get("lang") != lang:
+            st.query_params["lang"] = lang
 
         # Theme Selector Toggle (Persisted in st.session_state, independent of language)
         current_theme_code = st.session_state.get("theme", "Light Mode")
@@ -1588,6 +1639,7 @@ def main():
 
         def on_theme_toggle_change():
             st.session_state["theme"] = "Dark Mode" if st.session_state.get("dark_mode_toggle", False) else "Light Mode"
+            st.query_params["theme"] = "dark" if st.session_state.get("dark_mode_toggle", False) else "light"
 
         st.toggle(
             "Dark Mode",
@@ -1597,50 +1649,97 @@ def main():
         )
 
         is_dark = (st.session_state.get("theme", "Light Mode") == "Dark Mode")
+        desired_theme_param = "dark" if is_dark else "light"
+        if st.query_params.get("theme") != desired_theme_param:
+            st.query_params["theme"] = desired_theme_param
+
         st.markdown("---")
 
         st.markdown(f"### {t('sidebar_controls_title', lang)}")
 
         st.markdown(f"#### {t('capacity_section_title', lang)}")
+        raw_cap = st.query_params.get("capacity", "")
+        try:
+            cap_int = int(raw_cap)
+            init_capacity = cap_int if (25 <= cap_int <= 500) else 50
+        except (ValueError, TypeError):
+            init_capacity = 50
+
         capacity = st.slider(
             t("capacity_slider_label", lang),
             min_value=25,
             max_value=500,
-            value=50,
+            value=init_capacity,
             step=25,
             help=t("capacity_slider_help", lang),
         )
         st.caption(t("capacity_caption", lang))
+        if st.query_params.get("capacity") != str(capacity):
+            st.query_params["capacity"] = str(capacity)
 
         st.markdown("---")
         st.markdown(f"#### {t('thresholds_section_title', lang)}")
         st.caption(t("thresholds_caption", lang))
+
+        raw_high = st.query_params.get("high_th", "")
+        try:
+            high_float = round(float(raw_high), 2)
+            init_high = high_float if (0.50 <= high_float <= 0.85) else HIGH_RISK_THRESHOLD
+        except (ValueError, TypeError):
+            init_high = HIGH_RISK_THRESHOLD
+
         high_threshold = st.slider(
             t("high_threshold_label", lang),
             min_value=0.50,
             max_value=0.85,
-            value=HIGH_RISK_THRESHOLD,
+            value=init_high,
             step=0.05,
             help=t("high_threshold_help", lang),
         )
+        if st.query_params.get("high_th") != f"{high_threshold:.2f}":
+            st.query_params["high_th"] = f"{high_threshold:.2f}"
+
+        max_mod_val = min(0.55, high_threshold)
+        raw_mod = st.query_params.get("mod_th", "")
+        try:
+            mod_float = round(float(raw_mod), 2)
+            init_mod = mod_float if (0.20 <= mod_float <= max_mod_val) else min(MEDIUM_RISK_THRESHOLD, high_threshold)
+        except (ValueError, TypeError):
+            init_mod = min(MEDIUM_RISK_THRESHOLD, high_threshold)
+
         mod_threshold = st.slider(
             t("mod_threshold_label", lang),
             min_value=0.20,
-            max_value=min(0.55, high_threshold),
-            value=min(MEDIUM_RISK_THRESHOLD, high_threshold),
+            max_value=max_mod_val,
+            value=init_mod,
             step=0.05,
             help=t("mod_threshold_help", lang),
         )
+        if st.query_params.get("mod_th") != f"{mod_threshold:.2f}":
+            st.query_params["mod_th"] = f"{mod_threshold:.2f}"
 
         st.markdown("---")
         st.markdown(f"#### {t('filters_section_title', lang)}")
         age_options = sorted(list(df_scored["age_group"].unique()))
+
+        raw_ages = st.query_params.get("ages", "")
+        init_ages = []
+        if raw_ages:
+            parsed_ages = [a.strip() for a in raw_ages.split(",") if a.strip()]
+            init_ages = [a for a in parsed_ages if a in age_options]
+
         selected_ages = st.multiselect(
             t("age_filter_label", lang),
             options=age_options,
-            default=[],
+            default=init_ages,
             help=t("age_filter_help", lang),
         )
+        curr_ages_str = ",".join(selected_ages) if selected_ages else ""
+        if curr_ages_str:
+            if st.query_params.get("ages") != curr_ages_str:
+                st.query_params["ages"] = curr_ages_str
+        elif "ages" in st.query_params:
+            del st.query_params["ages"]
 
         st.markdown("---")
         st.markdown(f"#### {t('governance_title', lang)}")
@@ -1830,46 +1929,66 @@ def main():
 
             # Bar chart of variable categories derived dynamically from model coefficients
             driver_categories = compute_domain_importance(pipeline, lang=lang)
-            domain_color = "#2DD4BF" if is_dark else "#0D9488"
-            domain_chart = (
-                alt.Chart(driver_categories)
-                .mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4, color=domain_color)
-                .encode(
-                    x=alt.X("Relative Influence:Q", title=t("chart_variables_xaxis", lang), scale=alt.Scale(domain=[0, 100])),
-                    y=alt.Y("Clinical Domain:N", sort="-x", title=None),
-                    tooltip=[
-                        alt.Tooltip("Clinical Domain:N", title=t("col_clinical_domain", lang)),
-                        alt.Tooltip("Relative Influence:Q", title=t("col_relative_influence", lang), format=".0f"),
-                    ],
+            view_domain = render_chart_data_toggle(key="toggle_view_domain", lang=lang)
+
+            if view_domain == "data":
+                st.dataframe(driver_categories, use_container_width=True, hide_index=True, height=200)
+            else:
+                domain_color = "#2DD4BF" if is_dark else "#0D9488"
+                domain_chart = (
+                    alt.Chart(driver_categories)
+                    .mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4, color=domain_color)
+                    .encode(
+                        x=alt.X("Relative Influence:Q", title=t("chart_variables_xaxis", lang), scale=alt.Scale(domain=[0, 100])),
+                        y=alt.Y("Clinical Domain:N", sort="-x", title=None),
+                        tooltip=[
+                            alt.Tooltip("Clinical Domain:N", title=t("col_clinical_domain", lang)),
+                            alt.Tooltip("Relative Influence:Q", title=t("col_relative_influence", lang), format=".0f"),
+                        ],
+                    )
+                    .properties(height=200)
                 )
-                .properties(height=200)
-            )
-            domain_chart = apply_chart_theme(domain_chart, is_dark=is_dark)
-            st.altair_chart(domain_chart, use_container_width=True, theme=None)
+                domain_chart = apply_chart_theme(domain_chart, is_dark=is_dark)
+                st.altair_chart(domain_chart, use_container_width=True, theme=None)
+
             st.caption(t("chart_variables_caption", lang))
 
             # Score Distribution Histogram (Optimized with NumPy aggregated bins)
             st.markdown("---")
-            st.markdown(f"##### {t('hist_title', lang)}")
+            h_col1, h_col2 = st.columns([1.8, 1.2])
+            with h_col1:
+                st.markdown(f"##### {t('hist_title', lang)}")
+            with h_col2:
+                view_hist = render_chart_data_toggle(key="toggle_view_hist", lang=lang)
+
             hist_df = compute_score_histogram_bins(scores, bins=25)
-            hist_color = "#38BDF8" if is_dark else "#0284C7"
-            hist_chart = (
-                alt.Chart(hist_df)
-                .mark_bar(color=hist_color, opacity=0.85)
-                .encode(
-                    x=alt.X("bin_start:Q", bin="binned", title=t("hist_xaxis", lang)),
-                    x2="bin_end:Q",
-                    y=alt.Y("count:Q", title=t("hist_yaxis", lang)),
-                    tooltip=[
-                        alt.Tooltip("bin_start:Q", title=t("hist_tt_start", lang), format=".2f"),
-                        alt.Tooltip("bin_end:Q", title=t("hist_tt_end", lang), format=".2f"),
-                        alt.Tooltip("count:Q", title=t("hist_tt_count", lang), format=","),
-                    ],
+            if view_hist == "data":
+                hist_table = pd.DataFrame({
+                    t("hist_col_range", lang): [f"{r['bin_start']:.2f} – {r['bin_end']:.2f}" for _, r in hist_df.iterrows()],
+                    t("hist_col_count", lang): [f"{int(r['count']):,}" for _, r in hist_df.iterrows()],
+                    t("hist_col_pct", lang): [f"{r['pct']:.1f}%" for _, r in hist_df.iterrows()],
+                })
+                st.dataframe(hist_table, use_container_width=True, hide_index=True, height=160)
+            else:
+                hist_color = "#38BDF8" if is_dark else "#0284C7"
+                hist_chart = (
+                    alt.Chart(hist_df)
+                    .mark_bar(color=hist_color, opacity=0.85)
+                    .encode(
+                        x=alt.X("bin_start:Q", bin="binned", title=t("hist_xaxis", lang)),
+                        x2="bin_end:Q",
+                        y=alt.Y("count:Q", title=t("hist_yaxis", lang)),
+                        tooltip=[
+                            alt.Tooltip("bin_start:Q", title=t("hist_tt_start", lang), format=".2f"),
+                            alt.Tooltip("bin_end:Q", title=t("hist_tt_end", lang), format=".2f"),
+                            alt.Tooltip("count:Q", title=t("hist_tt_count", lang), format=","),
+                        ],
+                    )
+                    .properties(height=160)
                 )
-                .properties(height=160)
-            )
-            hist_chart = apply_chart_theme(hist_chart, is_dark=is_dark)
-            st.altair_chart(hist_chart, use_container_width=True, theme=None)
+                hist_chart = apply_chart_theme(hist_chart, is_dark=is_dark)
+                st.altair_chart(hist_chart, use_container_width=True, theme=None)
+
             mean_score = float(np.mean(scores)) if len(scores) > 0 else 0.0
             median_score = float(np.median(scores)) if len(scores) > 0 else 0.0
             st.caption(
@@ -2193,48 +2312,87 @@ def main():
         st.markdown("---")
 
         # Mathematical Feature Attribution (Local Explanation)
-        st.markdown(f"#### {t('attribution_section_title', lang)}")
+        attr_hcol1, attr_hcol2 = st.columns([2.5, 1])
+        with attr_hcol1:
+            st.markdown(f"#### {t('attribution_section_title', lang)}")
+        with attr_hcol2:
+            view_attribution = render_chart_data_toggle(key="toggle_view_attribution", lang=lang)
+
         st.caption(t("attribution_caption", lang))
 
         exp_col1, exp_col2 = st.columns(2)
 
         with exp_col1:
-            st.markdown(t("pos_drivers_title", lang))
+            pos_hcol1, pos_hcol2 = st.columns([1.8, 1.2])
+            with pos_hcol1:
+                st.markdown(t("pos_drivers_title", lang))
+            with pos_hcol2:
+                view_pos = render_chart_data_toggle(key="toggle_view_pos", lang=lang)
+
+            show_pos_data = (view_attribution == "data") or (view_pos == "data")
             if pos_factors:
-                pos_df = pd.DataFrame(pos_factors)
-                pos_bar_color = "#F87171" if is_dark else "#DC2626"
-                pos_chart = (
-                    alt.Chart(pos_df)
-                    .mark_bar(color=pos_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
-                    .encode(
-                        x=alt.X("contribution:Q", title=t("pos_chart_xaxis", lang)),
-                        y=alt.Y("clinical_name:N", sort="-x", title=None),
-                        tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                if show_pos_data:
+                    pos_table = pd.DataFrame([
+                        {
+                            t("col_factor", lang): f["clinical_name"],
+                            t("col_impact", lang): f"+{f['contribution']:.3f}",
+                            t("col_feature_id", lang): f["raw_feature"],
+                        }
+                        for f in pos_factors
+                    ])
+                    st.dataframe(pos_table, use_container_width=True, hide_index=True, height=200)
+                else:
+                    pos_df = pd.DataFrame(pos_factors)
+                    pos_bar_color = "#F87171" if is_dark else "#DC2626"
+                    pos_chart = (
+                        alt.Chart(pos_df)
+                        .mark_bar(color=pos_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+                        .encode(
+                            x=alt.X("contribution:Q", title=t("pos_chart_xaxis", lang)),
+                            y=alt.Y("clinical_name:N", sort="-x", title=None),
+                            tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                        )
+                        .properties(height=200)
                     )
-                    .properties(height=200)
-                )
-                pos_chart = apply_chart_theme(pos_chart, is_dark=is_dark)
-                st.altair_chart(pos_chart, use_container_width=True, theme=None)
+                    pos_chart = apply_chart_theme(pos_chart, is_dark=is_dark)
+                    st.altair_chart(pos_chart, use_container_width=True, theme=None)
             else:
                 st.info(t("pos_empty_state", lang))
 
         with exp_col2:
-            st.markdown(t("neg_drivers_title", lang))
+            neg_hcol1, neg_hcol2 = st.columns([1.8, 1.2])
+            with neg_hcol1:
+                st.markdown(t("neg_drivers_title", lang))
+            with neg_hcol2:
+                view_neg = render_chart_data_toggle(key="toggle_view_neg", lang=lang)
+
+            show_neg_data = (view_attribution == "data") or (view_neg == "data")
             if neg_factors:
-                neg_df = pd.DataFrame(neg_factors)
-                neg_bar_color = "#34D399" if is_dark else "#059669"
-                neg_chart = (
-                    alt.Chart(neg_df)
-                    .mark_bar(color=neg_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
-                    .encode(
-                        x=alt.X("contribution:Q", title=t("neg_chart_xaxis", lang)),
-                        y=alt.Y("clinical_name:N", sort="x", title=None),
-                        tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                if show_neg_data:
+                    neg_table = pd.DataFrame([
+                        {
+                            t("col_factor", lang): f["clinical_name"],
+                            t("col_impact", lang): f"{f['contribution']:.3f}",
+                            t("col_feature_id", lang): f["raw_feature"],
+                        }
+                        for f in neg_factors
+                    ])
+                    st.dataframe(neg_table, use_container_width=True, hide_index=True, height=200)
+                else:
+                    neg_df = pd.DataFrame(neg_factors)
+                    neg_bar_color = "#34D399" if is_dark else "#059669"
+                    neg_chart = (
+                        alt.Chart(neg_df)
+                        .mark_bar(color=neg_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+                        .encode(
+                            x=alt.X("contribution:Q", title=t("neg_chart_xaxis", lang)),
+                            y=alt.Y("clinical_name:N", sort="x", title=None),
+                            tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                        )
+                        .properties(height=200)
                     )
-                    .properties(height=200)
-                )
-                neg_chart = apply_chart_theme(neg_chart, is_dark=is_dark)
-                st.altair_chart(neg_chart, use_container_width=True, theme=None)
+                    neg_chart = apply_chart_theme(neg_chart, is_dark=is_dark)
+                    st.altair_chart(neg_chart, use_container_width=True, theme=None)
             else:
                 st.info(t("neg_empty_state", lang))
 

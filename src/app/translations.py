@@ -664,6 +664,53 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
         "ಕನ್ನಡ": "ಮೂಲ ಮಾದರಿಯ ಇಂಟರ್‌ಸೆಪ್ಟ್ $(\\beta_0)$: `{val:.3f}`",
     },
 
+    # Graph / Data View Toggle & Table Headers
+    "btn_graph": {
+        "English": "Graph",
+        "हिन्दी": "ग्राफ",
+        "ಕನ್ನಡ": "ಗ್ರಾಫ್",
+    },
+    "btn_data": {
+        "English": "Data",
+        "हिन्दी": "डेटा",
+        "ಕನ್ನಡ": "ಡೇಟಾ",
+    },
+    "lbl_view_mode": {
+        "English": "View Mode",
+        "हिन्दी": "दृश्य मोड",
+        "ಕನ್ನಡ": "ವೀಕ್ಷಣೆ ಮೋಡ್",
+    },
+    "hist_col_range": {
+        "English": "Score Range",
+        "हिन्दी": "स्कोर सीमा",
+        "ಕನ್ನಡ": "ಸ್ಕೋರ್ ಶ್ರೇಣಿ",
+    },
+    "hist_col_count": {
+        "English": "Encounters",
+        "हिन्दी": "एनकाउंटर संख्या",
+        "ಕನ್ನಡ": "ದಾಖಲಾತಿಗಳ ಸಂಖ್ಯೆ",
+    },
+    "hist_col_pct": {
+        "English": "Percentage",
+        "हिन्दी": "प्रतिशत",
+        "ಕನ್ನಡ": "ಶೇಕಡಾವಾರು",
+    },
+    "col_factor": {
+        "English": "Clinical Factor",
+        "हिन्दी": "नैदानिक कारक",
+        "ಕನ್ನಡ": "ಕ್ಲಿನಿಕಲ್ ಅಂಶ",
+    },
+    "col_impact": {
+        "English": "Log-Odds Impact (βᵢ xᵢ)",
+        "हिन्दी": "लॉग-ऑड्स प्रभाव (βᵢ xᵢ)",
+        "ಕನ್ನಡ": "ಲಾಗ್-ಆಡ್ಸ್ ಪ್ರಭಾವ (βᵢ xᵢ)",
+    },
+    "col_feature_id": {
+        "English": "Model Feature",
+        "हिन्दी": "मॉडल विशेषता",
+        "ಕನ್ನಡ": "ಮಾದರಿ ವೈಶಿಷ್ಟ್ಯ",
+    },
+
     # Patient Data-Quality Notice
     "dq_title": {
         "English": "Patient Data-Quality & Record Completeness Notice",
