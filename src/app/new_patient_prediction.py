@@ -1191,56 +1191,73 @@ def render_new_patient_tab(
                 unsafe_allow_html=True,
             )
 
-        # Mathematical Feature Attribution Display
-        pos_factors = latest_result["pos_drivers"]
-        neg_factors = latest_result["neg_drivers"]
-        intercept_val = latest_result["intercept"]
+        # -------------------------------------------------------------
+        # Why this risk score? Patient-specific justification
+        # -------------------------------------------------------------
+        pos_factors = latest_result.get("pos_drivers", [])
+        neg_factors = latest_result.get("neg_drivers", [])
+        intercept_val = latest_result.get("intercept", 0.0)
 
         st.markdown("---")
-        st.markdown(f"#### 🔍 {t('attribution_section_title', lang)}")
+        st.markdown(f"### 💡 {t('why_this_risk_score', lang)}")
+
+        tier_label = translate_tier(tier, lang)
+        st.markdown(
+            f"**Patient Predicted Risk Probability:** `{score_pct:.1f}%` ({score_val:.4f}) &nbsp;|&nbsp; "
+            f"**Assigned Risk Category:** `{tier_label}`"
+        )
         st.caption(t("attribution_caption", lang))
 
-        exp_c1, exp_c2 = st.columns(2)
+        if not pos_factors and not neg_factors:
+            st.info(f"ℹ️ {t('attribution_unavailable', lang)}")
+        else:
+            exp_c1, exp_c2 = st.columns(2)
 
-        with exp_c1:
-            st.markdown(t("pos_drivers_title", lang))
-            if pos_factors:
-                pos_df = pd.DataFrame(pos_factors)
-                pos_bar_color = "#F87171" if is_dark else "#DC2626"
-                pos_chart = (
-                    alt.Chart(pos_df)
-                    .mark_bar(color=pos_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
-                    .encode(
-                        x=alt.X("contribution:Q", title=t("pos_chart_xaxis", lang)),
-                        y=alt.Y("clinical_name:N", sort="-x", title=None),
-                        tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+            with exp_c1:
+                st.markdown(f"##### 🔺 {t('factors_pushing_higher', lang)}")
+                st.caption(f"{t('pos_chart_xaxis', lang)} $(\\beta_i x_i > 0)$:")
+                if pos_factors:
+                    for f in pos_factors:
+                        st.markdown(f"- **{f['clinical_name']}**: `+{f['contribution']:.3f}` log-odds")
+                    pos_df = pd.DataFrame(pos_factors)
+                    pos_bar_color = "#F87171" if is_dark else "#DC2626"
+                    pos_chart = (
+                        alt.Chart(pos_df)
+                        .mark_bar(color=pos_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+                        .encode(
+                            x=alt.X("contribution:Q", title=t("pos_chart_xaxis", lang)),
+                            y=alt.Y("clinical_name:N", sort="-x", title=None),
+                            tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                        )
+                        .properties(height=180)
                     )
-                    .properties(height=180)
-                )
-                pos_chart = apply_chart_theme(pos_chart, is_dark=is_dark)
-                st.altair_chart(pos_chart, use_container_width=True, theme=None)
-            else:
-                st.info(t("pos_empty_state", lang))
+                    pos_chart = apply_chart_theme(pos_chart, is_dark=is_dark)
+                    st.altair_chart(pos_chart, use_container_width=True, theme=None)
+                else:
+                    st.info(t("pos_empty_state", lang))
 
-        with exp_c2:
-            st.markdown(t("neg_drivers_title", lang))
-            if neg_factors:
-                neg_df = pd.DataFrame(neg_factors)
-                neg_bar_color = "#34D399" if is_dark else "#059669"
-                neg_chart = (
-                    alt.Chart(neg_df)
-                    .mark_bar(color=neg_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
-                    .encode(
-                        x=alt.X("contribution:Q", title=t("neg_chart_xaxis", lang)),
-                        y=alt.Y("clinical_name:N", sort="x", title=None),
-                        tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+            with exp_c2:
+                st.markdown(f"##### 🔻 {t('factors_pushing_lower', lang)}")
+                st.caption(f"{t('neg_chart_xaxis', lang)} $(\\beta_i x_i < 0)$:")
+                if neg_factors:
+                    for f in neg_factors:
+                        st.markdown(f"- **{f['clinical_name']}**: `{f['contribution']:.3f}` log-odds")
+                    neg_df = pd.DataFrame(neg_factors)
+                    neg_bar_color = "#34D399" if is_dark else "#059669"
+                    neg_chart = (
+                        alt.Chart(neg_df)
+                        .mark_bar(color=neg_bar_color, cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+                        .encode(
+                            x=alt.X("contribution:Q", title=t("neg_chart_xaxis", lang)),
+                            y=alt.Y("clinical_name:N", sort="x", title=None),
+                            tooltip=["clinical_name", alt.Tooltip("contribution:Q", format=".3f")],
+                        )
+                        .properties(height=180)
                     )
-                    .properties(height=180)
-                )
-                neg_chart = apply_chart_theme(neg_chart, is_dark=is_dark)
-                st.altair_chart(neg_chart, use_container_width=True, theme=None)
-            else:
-                st.info(t("neg_empty_state", lang))
+                    neg_chart = apply_chart_theme(neg_chart, is_dark=is_dark)
+                    st.altair_chart(neg_chart, use_container_width=True, theme=None)
+                else:
+                    st.info(t("neg_empty_state", lang))
 
         st.caption(f"{t('intercept_caption', lang, val=intercept_val)}")
 

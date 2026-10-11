@@ -1403,6 +1403,26 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
         "हिन्दी": "इस एनकाउंटर के दौरान फास्टिंग सीरम ग्लूकोज परीक्षण दर्ज नहीं किया गया था।",
         "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಯ ಸಮಯದಲ್ಲಿ ಉಪವಾಸದ ಸೀರಮ್ ಗ್ಲೂಕೋಸ್ ಪರೀಕ್ಷೆಯನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
     },
+    "why_this_risk_score": {
+        "English": "Why this risk score?",
+        "हिन्दी": "यह जोखिम स्कोर क्यों?",
+        "ಕನ್ನಡ": "ಈ ಅಪಾಯದ ಸ್ಕೋರ್ ಏಕೆ?",
+    },
+    "factors_pushing_higher": {
+        "English": "Factors pushing the model's score higher",
+        "हिन्दी": "मॉडल के स्कोर को बढ़ाने वाले कारक",
+        "ಕನ್ನಡ": "ಮಾದರಿಯ ಸ್ಕೋರ್ ಅನ್ನು ಹೆಚ್ಚಿಸುವ ಅಂಶಗಳು",
+    },
+    "factors_pushing_lower": {
+        "English": "Factors pushing the model's score lower",
+        "हिन्दी": "मॉडल के स्कोर को घटाने वाले कारक",
+        "ಕನ್ನಡ": "ಮಾದರಿಯ ಸ್ಕೋರ್ ಅನ್ನು ಕಡಿಮೆ ಮಾಡುವ ಅಂಶಗಳು",
+    },
+    "attribution_unavailable": {
+        "English": "Patient-specific feature attribution is currently unavailable for this calculation. The mathematical log-odds decomposition could not be mapped to the model's input features.",
+        "हिन्दी": "इस गणना के लिए रोगी-विशिष्ट विशेषता स्पष्टीकरण वर्तमान में अनुपलब्ध है।",
+        "ಕನ್ನಡ": "ಈ ಲೆಕ್ಕಾಚಾರಕ್ಕೆ ರೋಗಿ-ನಿರ್ದಿಷ್ಟ ವೈಶಿಷ್ಟ್ಯದ ಕೊಡುಗೆ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ.",
+    },
 }
 
 # Tiers Translation
