@@ -1122,6 +1122,287 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
         "हिन्दी": "निर्णय सीमा निकटता",
         "ಕನ್ನಡ": "ನಿರ್ಧಾರದ ಗಡಿಯ ಸಾಮೀಪ್ಯ",
     },
+    "np_scenario_brief_label": {
+        "English": "Scenario Brief:",
+        "हिन्दी": "परिदृश्य संक्षेप:",
+        "ಕನ್ನಡ": "ಸನ್ನಿವೇಶದ ಸಾರಾಂಶ:",
+    },
+    # Fictional Sample Profiles Metadata (English, Hindi, Kannada)
+    "prof_name_high_risk_geriatric": {
+        "English": "High-Risk Geriatric (Frequent Admissions & Insulin Instability)",
+        "हिन्दी": "उच्च जोखिम वाले वृद्ध रोगी (बार-बार दाखिले और इंसुलिन अस्थिरता)",
+        "ಕನ್ನಡ": "ಹೆಚ್ಚಿನ ಅಪಾಯದ ವೃದ್ಧ ರೋಗಿ (ಪದೇ ಪದೇ ದಾಖಲಾತಿಗಳು ಮತ್ತು ಇನ್ಸುಲಿನ್ ಅಸ್ಥಿರತೆ)",
+    },
+    "prof_badge_high_risk_geriatric": {
+        "English": "🚨 Higher Risk / Frequent Inpatient",
+        "हिन्दी": "🚨 उच्च जोखिम / बार-बार अस्पताल भर्ती",
+        "ಕನ್ನಡ": "🚨 ಹೆಚ್ಚಿನ ಅಪಾಯ / ಪದೇ ಪದೇ ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿ",
+    },
+    "prof_desc_high_risk_geriatric": {
+        "English": "Fictional 82-year-old patient admitted through the ER with acute decompensated Heart Failure, 3 prior hospitalizations in the past year, marked hyperglycemia (A1C > 8, Glucose > 300), and upward insulin titration during the 8-day admission.",
+        "हिन्दी": "काल्पनिक 82 वर्षीय रोगी को तीव्र हार्ट फेल्योर के साथ आपातकालीन कक्ष के माध्यम से भर्ती कराया गया, पिछले वर्ष में 3 पूर्व अस्पताल दाखिले, अत्यधिक हाइपरग्लाइसेमिया (A1C > 8, ग्लूकोज > 300), और 8-दिवसीय ठहराव के दौरान इंसुलिन में वृद्धि।",
+        "ಕನ್ನಡ": "ತೀವ್ರ ಹೃದಯ ವೈಫಲ್ಯದೊಂದಿಗೆ ತುರ್ತು ವಿಭಾಗದ ಮೂಲಕ ದಾಖಲಾದ ಕಾಲ್ಪನಿಕ 82 ವರ್ಷದ ರೋಗಿ, ಕಳೆದ ವರ್ಷದಲ್ಲಿ 3 ಹಿಂದಿನ ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿಗಳು, ತೀವ್ರ ಹೈಪರ್‌ಗ್ಲೈಸೆಮಿಯಾ (A1C > 8, ಗ್ಲೂಕೋಸ್ > 300), ಮತ್ತು 8 ದಿನಗಳ ವಾಸ್ತವ್ಯದಲ್ಲಿ ಇನ್ಸುಲಿನ್ ಹೆಚ್ಚಳ.",
+    },
+    "prof_name_moderate_risk_surgical": {
+        "English": "Moderate-Risk Post-Surgical (Regimen Adjusted)",
+        "हिन्दी": "मध्यम जोखिम वाले सर्जरी उपरांत रोगी (दवा व्यवस्था समायोजित)",
+        "ಕನ್ನಡ": "ಮಧ್ಯಮ ಅಪಾಯದ ಶಸ್ತ್ರಚಿಕಿತ್ಸಾ ನಂತರದ ರೋಗಿ (ಔಷಧಿ ಹೊಂದಾಣಿಕೆ ಮಾಡಲಾಗಿದೆ)",
+    },
+    "prof_badge_moderate_risk_surgical": {
+        "English": "⚠️ Moderate Risk / Regimen Adjustment",
+        "हिन्दी": "⚠️ मध्यम जोखिम / दवा समायोजन",
+        "ಕನ್ನಡ": "⚠️ ಮಧ್ಯಮ ಅಪಾಯ / ಔಷಧಿ ಹೊಂದಾಣಿಕೆ",
+    },
+    "prof_desc_moderate_risk_surgical": {
+        "English": "Fictional 56-year-old patient admitted urgently for acute diverticular/GI condition, stayed 4 days with moderate lab testing, diabetic regimen adjusted with downward metformin titration, and 1 prior hospital stay in the past year.",
+        "हिन्दी": "काल्पनिक 56 वर्षीय रोगी को तीव्र जठरांत्र (GI) स्थिति के लिए तत्काल भर्ती कराया गया, मध्यम प्रयोगशाला परीक्षणों के साथ 4 दिन ठहराव, मेटफॉर्मिन खुराक में कमी के साथ मधुमेह दवा व्यवस्था समायोजित, और पिछले वर्ष में 1 पूर्व अस्पताल दाखिला।",
+        "ಕನ್ನಡ": "ತೀವ್ರ ಜಠರಗರುಳಿನ (GI) ಸಮಸ್ಯೆಗೆ ತಕ್ಷಣ ದಾಖಲಾದ ಕಾಲ್ಪನಿಕ 56 ವರ್ಷದ ರೋಗಿ, ಮಧ್ಯಮ ಮಟ್ಟದ ಲ್ಯಾಬ್ ಪರೀಕ್ಷೆಗಳೊಂದಿಗೆ 4 ದಿನ ವಾಸ್ತವ್ಯ, ಮೆಟ್‌ಫಾರ್ಮಿನ್ ಕಡಿಮೆ ಮಾಡುವ ಮೂಲಕ ಮಧುಮೇಹ ಔಷಧಿ ಹೊಂದಾಣಿಕೆ, ಮತ್ತು ಕಳೆದ ವರ್ಷದಲ್ಲಿ 1 ಹಿಂದಿನ ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿ.",
+    },
+    "prof_name_lower_risk_young_adult": {
+        "English": "Lower-Risk Young Adult (First Admission & Stable Oral Regimen)",
+        "हिन्दी": "निम्न जोखिम वाले युवा वयस्क (पहला दाखिला और स्थिर मौखिक दवा)",
+        "ಕನ್ನಡ": "ಕಡಿಮೆ ಅಪಾಯದ ಯುವ ವಯಸ್ಕ (ಮೊದಲ ದಾಖಲಾತಿ ಮತ್ತು ಸ್ಥಿರ ಮೌಖಿಕ ಔಷಧಿ)",
+    },
+    "prof_badge_lower_risk_young_adult": {
+        "English": "✅ Lower Risk / First Admission",
+        "हिन्दी": "✅ निम्न जोखिम / पहला दाखिला",
+        "ಕನ್ನಡ": "✅ ಕಡಿಮೆ ಅಪಾಯ / ಮೊದಲ ದಾಖಲಾತಿ",
+    },
+    "prof_desc_lower_risk_young_adult": {
+        "English": "Fictional 34-year-old patient admitted electively for orthopedic arthroscopy with zero prior acute hospitalizations or ER visits, normal glycemic lab markers, and stable single-agent metformin therapy.",
+        "हिन्दी": "काल्पनिक 34 वर्षीय रोगी को आर्थोपेडिक आर्थ्रोस्कोपी के लिए ऐच्छिक रूप से भर्ती कराया गया, शून्य पूर्व तीव्र अस्पताल दाखिले या ER दौरे, सामान्य ग्लाइसेमिक लैब मार्कर, और स्थिर एकल-एजेंट मेटफॉर्मिन थेरेपी।",
+        "ಕನ್ನಡ": "ಆರ್ಥೋಪೆಡಿಕ್ ಆರ್ಥ್ರೋಸ್ಕೋಪಿಗಾಗಿ ಯೋಜಿತವಾಗಿ ದಾಖಲಾದ ಕಾಲ್ಪನಿಕ 34 ವರ್ಷದ ರೋಗಿ, ಯಾವುದೇ ಹಿಂದಿನ ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿ ಅಥವಾ ತುರ್ತು ಭೇಟಿಗಳಿಲ್ಲ, ಸಾಮಾನ್ಯ ಗ್ಲೈಸೆಮಿಕ್ ಲ್ಯಾಬ್ ಮೌಲ್ಯಗಳು, ಮತ್ತು ಸ್ಥಿರ ಏಕ-ಔಷಧಿ ಮೆಟ್‌ಫಾರ್ಮಿನ್ ಚಿಕಿತ್ಸೆ.",
+    },
+    "prof_name_missing_data_edge_case": {
+        "English": "Missing Diagnostic Code & Unperformed Lab Tests (Documentation Edge Case)",
+        "हिन्दी": "अनुपलब्ध डायग्नोस्टिक कोड और अप्रदर्शित लैब टेस्ट (दस्तावेज़ीकरण एज केस)",
+        "ಕನ್ನಡ": "ದಾಖಲಾಗದ ರೋಗನಿರ್ಣಯ ಕೋಡ್ ಮತ್ತು ಮಾಡದ ಲ್ಯಾಬ್ ಪರೀಕ್ಷೆಗಳು (ದಾಖಲೆಗಳ ಕೊರತೆಯ ಪ್ರಕರಣ)",
+    },
+    "prof_badge_missing_data_edge_case": {
+        "English": "⚠️ Safety Edge Case / Incomplete Data",
+        "हिन्दी": "⚠️ सुरक्षा एज केस / अपूर्ण डेटा",
+        "ಕನ್ನಡ": "⚠️ ಸುರಕ್ಷತಾ ಪ್ರಕರಣ / ಅಪೂರ್ಣ ಡೇಟಾ",
+    },
+    "prof_desc_missing_data_edge_case": {
+        "English": "Fictional 64-year-old male with unrecorded primary diagnosis billing code ('?'), unperformed HbA1c and fasting glucose tests, and unknown race. Verifies graceful handling of missing clinical records without crashing.",
+        "हिन्दी": "काल्पनिक 64 वर्षीय पुरुष रोगी जिसका प्राथमिक निदान बिलिंग कोड दर्ज नहीं है ('?'), HbA1c और फास्टिंग ग्लूकोज परीक्षण नहीं किए गए, और अज्ञात नस्ल। बिना क्रैश हुए लापता नैदानिक रिकॉर्ड्स के सुरक्षित प्रबंधन की पुष्टि करता है।",
+        "ಕನ್ನಡ": "ದಾಖಲಾಗದ ಪ್ರಾಥಮಿಕ ರೋಗನಿರ್ಣಯ ಬಿಲ್ಲಿಂಗ್ ಕೋಡ್ ('?'), ಮಾಡದ HbA1c ಮತ್ತು ಉಪವಾಸದ ಗ್ಲೂಕೋಸ್ ಪರೀಕ್ಷೆಗಳು, ಮತ್ತು ಅಜ್ಞಾತ ಜನಾಂಗ ಹೊಂದಿರುವ ಕಾಲ್ಪನಿಕ 64 ವರ್ಷದ ಪುರುಷ ರೋಗಿ. ಸಿಸ್ಟಮ್ ಕ್ರ್ಯಾಶ್ ಆಗದೆ ಅಪೂರ್ಣ ದಾಖಲೆಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ನಿರ್ವಹಿಸುವುದನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ.",
+    },
+    "prof_name_extended_stay_polypharmacy": {
+        "English": "Extended Stay (13 Days) with Extreme Polypharmacy (42 Meds)",
+        "हिन्दी": "विस्तारित ठहराव (13 दिन) और अत्यधिक पॉलीफार्मेसी (42 दवाएं)",
+        "ಕನ್ನಡ": "ದೀರ್ಘಾವಧಿ ವಾಸ್ತವ್ಯ (13 ದಿನಗಳು) ಮತ್ತು ಅತಿಯಾದ ಪಾಲಿಫಾರ್ಮಸಿ (42 ಔಷಧಿಗಳು)",
+    },
+    "prof_badge_extended_stay_polypharmacy": {
+        "English": "🚨 Higher Risk / Polypharmacy & Stay",
+        "हिन्दी": "🚨 उच्च जोखिम / पॉलीफार्मेसी और ठहराव",
+        "ಕನ್ನಡ": "🚨 ಹೆಚ್ಚಿನ ಅಪಾಯ / ಪಾಲಿಫಾರ್ಮಸಿ ಮತ್ತು ವಾಸ್ತವ್ಯ",
+    },
+    "prof_desc_extended_stay_polypharmacy": {
+        "English": "Fictional 85-year-old patient transferred from another hospital with complex respiratory infection, prolonged hospital stay of 13 days (near 14-day truncation limit), and 42 active medications triggering extreme polypharmacy warnings.",
+        "हिन्दी": "काल्पनिक 85 वर्षीय रोगी को जटिल श्वसन संक्रमण के साथ दूसरे अस्पताल से स्थानांतरित किया गया, 13 दिनों का लंबा अस्पताल ठहराव (14-दिवसीय सीमा के निकट), और अत्यधिक पॉलीफार्मेसी चेतावनियों को ट्रिगर करने वाली 42 सक्रिय दवाएं।",
+        "ಕನ್ನಡ": "ಸಂಕೀರ್ಣ ಉಸಿರಾಟದ ಸೋಂಕಿನೊಂದಿಗೆ ಮತ್ತೊಂದು ಆಸ್ಪತ್ರೆಯಿಂದ ವರ್ಗಾವಣೆಯಾದ ಕಾಲ್ಪನಿಕ 85 ವರ್ಷದ ರೋಗಿ, 13 ದಿನಗಳ ದೀರ್ಘಾವಧಿ ವಾಸ್ತವ್ಯ (14 ದಿನಗಳ ಮಿತಿಯ ಹತ್ತಿರ), ಮತ್ತು ತೀವ್ರ ಪಾಲಿಫಾರ್ಮಸಿ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಪ್ರಚೋದಿಸುವ 42 ಸಕ್ರಿಯ ಔಷಧಿಗಳು.",
+    },
+    "prof_name_frequent_er_respiratory": {
+        "English": "Frequent ER Utilization with Chronic COPD (Non-Insulin Managed)",
+        "हिन्दी": "क्रोनिक सीओपीडी के साथ बार-बार ER उपयोग (गैर-इंसुलिन प्रबंधित)",
+        "ಕನ್ನಡ": "ದೀರ್ಘಕಾಲದ COPD ಯೊಂದಿಗೆ ಆಗಾಗ್ಗೆ ತುರ್ತು ವಿಭಾಗ ಬಳಕೆ (ಇನ್ಸುಲಿನ್ ರಹಿತ ನಿರ್ವಹಣೆ)",
+    },
+    "prof_badge_frequent_er_respiratory": {
+        "English": "⚠️ Moderate to High / ER Utilizer",
+        "हिन्दी": "⚠️ मध्यम से उच्च / ER उपयोगकर्ता",
+        "ಕನ್ನಡ": "⚠️ ಮಧ್ಯಮದಿಂದ ಹೆಚ್ಚಿನ / ತುರ್ತು ಬಳಕೆದಾರ",
+    },
+    "prof_desc_frequent_er_respiratory": {
+        "English": "Fictional 74-year-old patient presenting via ER with acute COPD exacerbation, 3 prior ER visits in the past year but 0 inpatient admissions, managed with oral sulfonylurea without insulin, with elevated A1C (> 8).",
+        "हिन्दी": "काल्पनिक 74 वर्षीय रोगी जो तीव्र सीओपीडी स्थिति के साथ ER के माध्यम से आया, पिछले वर्ष में 3 पूर्व ER दौरे लेकिन 0 इनपेशेंट दाखिले, इंसुलिन के बिना मौखिक सल्फोनील्यूरिया के साथ प्रबंधित, और बढ़ा हुआ A1C (> 8)।",
+        "ಕನ್ನಡ": "ತೀವ್ರ COPD ಉಲ್ಬಣದೊಂದಿಗೆ ತುರ್ತು ವಿಭಾಗದ ಮೂಲಕ ಬಂದ ಕಾಲ್ಪನಿಕ 74 ವರ್ಷದ ರೋಗಿ, ಕಳೆದ ವರ್ಷದಲ್ಲಿ 3 ಹಿಂದಿನ ತುರ್ತು ಭೇಟಿಗಳು ಆದರೆ 0 ಆಸ್ಪತ್ರೆ ದಾಖಲಾತಿಗಳು, ಇನ್ಸುಲಿನ್ ಇಲ್ಲದೆ ಮೌಖಿಕ ಸಲ್ಫೋನಿಲ್ಯೂರಿಯಾದೊಂದಿಗೆ ನಿರ್ವಹಿಸಲಾಗಿದೆ, ಮತ್ತು ಹೆಚ್ಚಿನ A1C (> 8).",
+    },
+
+    # Form Fields, Input Help & Labels
+    "np_sec_diagnoses_caption": {
+        "English": "Enter standard 3-digit ICD-9 codes (e.g. 428=Heart Failure, 250=Diabetes, 486=Pneumonia, 530=Digestive, ?=Missing).",
+        "हिन्दी": "मानक 3-अंकीय ICD-9 कोड दर्ज करें (उदा. 428=हार्ट फेल्योर, 250=मधुमेह, 486=निमोनिया, 530=पाचन, ?=अनुपलब्ध)।",
+        "ಕನ್ನಡ": "ಪ್ರಮಾಣಿತ 3-ಅಂಕಿಯ ICD-9 ಕೋಡ್‌ಗಳನ್ನು ನಮೂದಿಸಿ (ಉದಾ. 428=ಹೃದಯ ವೈಫಲ್ಯ, 250=ಮಧುಮೇಹ, 486=ನ್ಯುಮೋನಿಯಾ, 530=ಜೀರ್ಣಾಂಗ, ?=ದಾಖಲಾಗಿಲ್ಲ).",
+    },
+    "np_diag_1_label": {
+        "English": "Primary ICD-9 (`diag_1`)",
+        "हिन्दी": "प्राथमिक ICD-9 (`diag_1`)",
+        "ಕನ್ನಡ": "ಪ್ರಾಥಮಿಕ ICD-9 (`diag_1`)",
+    },
+    "np_diag_2_label": {
+        "English": "Secondary ICD-9 (`diag_2`)",
+        "हिन्दी": "द्वितीयक ICD-9 (`diag_2`)",
+        "ಕನ್ನಡ": "ದ್ವಿತೀಯಕ ICD-9 (`diag_2`)",
+    },
+    "np_diag_3_label": {
+        "English": "Tertiary ICD-9 (`diag_3`)",
+        "हिन्दी": "तृतीयक ICD-9 (`diag_3`)",
+        "ಕನ್ನಡ": "ತೃತೀಯಕ ICD-9 (`diag_3`)",
+    },
+    "np_num_procedures": {
+        "English": "Diagnostic Procedures (0-6)",
+        "हिन्दी": "डायग्नोस्टिक प्रक्रियाएं (0-6)",
+        "ಕನ್ನಡ": "ಡಯಾಗ್ನೋಸ್ಟಿಕ್ ಪ್ರಕ್ರಿಯೆಗಳು (0-6)",
+    },
+    "np_num_diagnoses": {
+        "English": "Documented Diagnoses (1-16)",
+        "हिन्दी": "दर्ज किए गए निदान (1-16)",
+        "ಕನ್ನಡ": "ದಾಖಲಾದ ರೋಗನಿರ್ಣಯಗಳು (1-16)",
+    },
+    "np_med_ch_desc": {
+        "English": "Ch - Medication Adjusted",
+        "हिन्दी": "Ch - दवा व्यवस्था में बदलाव",
+        "ಕನ್ನಡ": "Ch - ಔಷಧಿಯಲ್ಲಿ ಬದಲಾವಣೆ",
+    },
+    "np_med_no_desc": {
+        "English": "No - No Dosage Change",
+        "हिन्दी": "No - खुराक में कोई बदलाव नहीं",
+        "ಕನ್ನಡ": "No - ಡೋಸ್‌ನಲ್ಲಿ ಯಾವುದೇ ಬದಲಾವಣೆ ಇಲ್ಲ",
+    },
+
+    # Admission Types
+    "adm_type_1": {
+        "English": "1 - Emergency",
+        "हिन्दी": "1 - आपातकालीन (Emergency)",
+        "ಕನ್ನಡ": "1 - ತುರ್ತು (Emergency)",
+    },
+    "adm_type_2": {
+        "English": "2 - Urgent",
+        "हिन्दी": "2 - तात्कालिक (Urgent)",
+        "ಕನ್ನಡ": "2 - ತಕ್ಷಣದ (Urgent)",
+    },
+    "adm_type_3": {
+        "English": "3 - Elective",
+        "हिन्दी": "3 - ऐच्छिक (Elective)",
+        "ಕನ್ನಡ": "3 - ಪೂರ್ವಯೋಜಿತ (Elective)",
+    },
+    "adm_type_4": {
+        "English": "4 - Newborn",
+        "हिन्दी": "4 - नवजात (Newborn)",
+        "ಕನ್ನಡ": "4 - ನವಜಾತ ಶಿಶು (Newborn)",
+    },
+    "adm_type_5": {
+        "English": "5 - Not Available",
+        "हिन्दी": "5 - अनुपलब्ध (Not Available)",
+        "ಕನ್ನಡ": "5 - ಲಭ್ಯವಿಲ್ಲ (Not Available)",
+    },
+    "adm_type_6": {
+        "English": "6 - NULL / Unrecorded",
+        "हिन्दी": "6 - दर्ज नहीं (NULL / Unrecorded)",
+        "ಕನ್ನಡ": "6 - ದಾಖಲಾಗಿಲ್ಲ (NULL / Unrecorded)",
+    },
+    "adm_type_7": {
+        "English": "7 - Trauma Center",
+        "हिन्दी": "7 - ट्रॉमा सेंटर (Trauma Center)",
+        "ಕನ್ನಡ": "7 - ಟ್ರಾಮಾ ಸೆಂಟರ್ (Trauma Center)",
+    },
+    "adm_type_8": {
+        "English": "8 - Not Mapped",
+        "हिन्दी": "8 - गैर-मैप किया गया (Not Mapped)",
+        "ಕನ್ನಡ": "8 - ಮ್ಯಾಪ್ ಮಾಡಿಲ್ಲ (Not Mapped)",
+    },
+
+    # Admission Sources
+    "adm_src_7": {
+        "English": "7 - Emergency Room",
+        "हिन्दी": "7 - आपातकालीन कक्ष (ER)",
+        "ಕನ್ನಡ": "7 - ತುರ್ತು ವಿಭಾಗ (ER)",
+    },
+    "adm_src_1": {
+        "English": "1 - Physician Referral",
+        "हिन्दी": "1 - चिकित्सक रेफरल",
+        "ಕನ್ನಡ": "1 - ವೈದ್ಯರ ಶಿಫಾರಸು",
+    },
+    "adm_src_2": {
+        "English": "2 - Clinic Referral",
+        "हिन्दी": "2 - क्लिनिक रेफरल",
+        "ಕನ್ನಡ": "2 - ಕ್ಲಿನಿಕ್ ಶಿಫಾರಸು",
+    },
+    "adm_src_3": {
+        "English": "3 - HMO Referral",
+        "हिन्दी": "3 - HMO रेफरल",
+        "ಕನ್ನಡ": "3 - HMO ಶಿಫಾರಸು",
+    },
+    "adm_src_4": {
+        "English": "4 - Transfer from Hospital",
+        "हिन्दी": "4 - अस्पताल से स्थानांतरण",
+        "ಕನ್ನಡ": "4 - ಆಸ್ಪತ್ರೆಯಿಂದ ವರ್ಗಾವಣೆ",
+    },
+    "adm_src_5": {
+        "English": "5 - Transfer from SNF",
+        "हिन्दी": "5 - SNF से स्थानांतरण",
+        "ಕನ್ನಡ": "5 - SNF ನಿಂದ ವರ್ಗಾವಣೆ",
+    },
+    "adm_src_6": {
+        "English": "6 - Transfer from Other Facility",
+        "हिन्दी": "6 - अन्य सुविधा से स्थानांतरण",
+        "ಕನ್ನಡ": "6 - ಇತರ ಸೌಲಭ್ಯದಿಂದ ವರ್ಗಾವಣೆ",
+    },
+    "adm_src_10": {
+        "English": "10 - Critical Access Hospital",
+        "हिन्दी": "10 - क्रिटिकल एक्सेस अस्पताल",
+        "ಕನ್ನಡ": "10 - ಕ್ರಿಟಿಕಲ್ ಆಕ್ಸೆಸ್ ಆಸ್ಪತ್ರೆ",
+    },
+    "adm_src_20": {
+        "English": "20 - Not Mapped",
+        "हिन्दी": "20 - गैर-मैप किया गया",
+        "ಕನ್ನಡ": "20 - ಮ್ಯಾಪ್ ಮಾಡಿಲ್ಲ",
+    },
+
+    # Medication Options
+    "med_opt_no": {
+        "English": "No",
+        "हिन्दी": "नहीं (No)",
+        "ಕನ್ನಡ": "ಇಲ್ಲ (No)",
+    },
+    "med_opt_steady": {
+        "English": "Steady",
+        "हिन्दी": "स्थिर (Steady)",
+        "ಕನ್ನಡ": "ಸ್ಥಿರ (Steady)",
+    },
+    "med_opt_up": {
+        "English": "Up",
+        "हिन्दी": "बढ़ा (Up)",
+        "ಕನ್ನಡ": "ಹೆಚ್ಚು (Up)",
+    },
+    "med_opt_down": {
+        "English": "Down",
+        "हिन्दी": "घटा (Down)",
+        "ಕನ್ನಡ": "ಕಡಿಮೆ (Down)",
+    },
+
+    # Result Labels & Advisories
+    "np_raw_logit_prob": {
+        "English": "Raw logit prob: {val:.4f}",
+        "हिन्दी": "कच्ची लॉजिट संभावना: {val:.4f}",
+        "ಕನ್ನಡ": "ಮೂಲ ಲಾಗಿಟ್ ಸಂಭವನೀಯತೆ: {val:.4f}",
+    },
+    "np_thresholds_label": {
+        "English": "Thresholds: High ≥ {high:.2f} · Mod ≥ {mod:.2f}",
+        "हिन्दी": "सीमाएं: उच्च ≥ {high:.2f} · मध्यम ≥ {mod:.2f}",
+        "ಕನ್ನಡ": "ಮಿತಿಗಳು: ಹೆಚ್ಚಿನ ≥ {high:.2f} · ಮಧ್ಯಮ ≥ {mod:.2f}",
+    },
+    "np_doc_notice": {
+        "English": "Documentation Notice",
+        "हिन्दी": "दस्तावेज़ीकरण सूचना",
+        "ಕನ್ನಡ": "ದಾಖಲೆಗಳ ಸೂಚನೆ",
+    },
+    "np_adv_missing_diag": {
+        "English": "Primary diagnosis ICD-9 code is unrecorded. Categorized as 'Missing' per standard benchmark rules.",
+        "हिन्दी": "प्राथमिक निदान ICD-9 कोड दर्ज नहीं है। मानक बेंचमार्क नियमों के अनुसार 'अनुपलब्ध' के रूप में वर्गीकृत।",
+        "ಕನ್ನಡ": "ಪ್ರಾಥಮಿಕ ರೋಗನಿರ್ಣಯ ICD-9 ಕೋಡ್ ದಾಖಲಾಗಿಲ್ಲ. ಪ್ರಮಾಣಿತ ಮಾನದಂಡಗಳ ಪ್ರಕಾರ 'ದಾಖಲಾಗಿಲ್ಲ' ಎಂದು ವರ್ಗೀಕರಿಸಲಾಗಿದೆ.",
+    },
+    "np_adv_missing_a1c": {
+        "English": "HbA1c laboratory assessment was not recorded during this encounter.",
+        "हिन्दी": "इस एनकाउंटर के दौरान HbA1c प्रयोगशाला परीक्षण दर्ज नहीं किया गया था।",
+        "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಯ ಸಮಯದಲ್ಲಿ HbA1c ಪ್ರಯೋಗಾಲಯ ಪರೀಕ್ಷೆಯನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
+    },
+    "np_adv_missing_glu": {
+        "English": "Fasting serum glucose test was not recorded during this encounter.",
+        "हिन्दी": "इस एनकाउंटर के दौरान फास्टिंग सीरम ग्लूकोज परीक्षण दर्ज नहीं किया गया था।",
+        "ಕನ್ನಡ": "ಈ ದಾಖಲಾತಿಯ ಸಮಯದಲ್ಲಿ ಉಪವಾಸದ ಸೀರಮ್ ಗ್ಲೂಕೋಸ್ ಪರೀಕ್ಷೆಯನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
+    },
 }
 
 # Tiers Translation
@@ -1768,7 +2049,11 @@ ACTION_WORDS = {
 def t(key: str, lang: str = "English", **kwargs) -> str:
     """Fetches translated string by key with fallbacks and formatting."""
     lang_dict = UI_STRINGS.get(key, {})
-    template = lang_dict.get(lang, lang_dict.get("English", key))
+    template = lang_dict.get(lang)
+    if not template:
+        template = lang_dict.get("English", key)
+    if not template:
+        template = key
     if kwargs:
         try:
             return template.format(**kwargs)
@@ -1926,3 +2211,21 @@ def get_summary_followup_wrapped(considerations: List[str], lang: str = "English
 def get_summary_disclaimer(lang: str = "English") -> str:
     """Retrieves localized summary disclaimer."""
     return SUMMARY_DISCLAIMER.get(lang, SUMMARY_DISCLAIMER["English"])
+
+
+def translate_adm_type(adm_id: str, lang: str = "English") -> str:
+    """Translates admission type ID into localized clinical label."""
+    key = f"adm_type_{adm_id}"
+    return t(key, lang) if key in UI_STRINGS else f"{adm_id} - Other"
+
+
+def translate_adm_source(src_id: str, lang: str = "English") -> str:
+    """Translates admission source ID into localized clinical label."""
+    key = f"adm_src_{src_id}"
+    return t(key, lang) if key in UI_STRINGS else f"{src_id} - Other"
+
+
+def translate_med_option(opt: str, lang: str = "English") -> str:
+    """Translates dosage regimen option ('No', 'Steady', 'Up', 'Down') into localized text."""
+    key = f"med_opt_{opt.lower()}"
+    return t(key, lang) if key in UI_STRINGS else opt

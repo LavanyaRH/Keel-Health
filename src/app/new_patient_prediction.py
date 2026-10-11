@@ -38,10 +38,32 @@ from src.app.translations import (
     DIAG_CATEGORY_TRANSLATIONS,
     FEATURE_TRANSLATIONS,
     TIER_TRANSLATIONS,
+    UI_STRINGS,
     t,
+    translate_adm_source,
+    translate_adm_type,
+    translate_med_option,
     translate_tier,
 )
 from src.features.preprocessing import get_feature_manifest
+
+
+def get_profile_badge(profile: Dict[str, Any], lang: str = "English") -> str:
+    """Returns localized profile badge or English fallback."""
+    key = profile.get("badge_key", "")
+    return t(key, lang) if key and key in UI_STRINGS else profile.get("badge", "")
+
+
+def get_profile_name(profile: Dict[str, Any], lang: str = "English") -> str:
+    """Returns localized profile name or English fallback."""
+    key = profile.get("name_key", "")
+    return t(key, lang) if key and key in UI_STRINGS else profile.get("name", "")
+
+
+def get_profile_desc(profile: Dict[str, Any], lang: str = "English") -> str:
+    """Returns localized profile description or English fallback."""
+    key = profile.get("desc_key", "")
+    return t(key, lang) if key and key in UI_STRINGS else profile.get("description", "")
 
 
 # -----------------------------------------------------------------------------
@@ -96,6 +118,9 @@ MED_OPTIONS_TWO = ["No", "Steady"]
 # -----------------------------------------------------------------------------
 SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
     "high_risk_geriatric": {
+        "name_key": "prof_name_high_risk_geriatric",
+        "badge_key": "prof_badge_high_risk_geriatric",
+        "desc_key": "prof_desc_high_risk_geriatric",
         "name": "High-Risk Geriatric (Frequent Admissions & Insulin Instability)",
         "badge": "🚨 Higher Risk / Frequent Inpatient",
         "description": (
@@ -148,6 +173,9 @@ SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
         },
     },
     "moderate_risk_surgical": {
+        "name_key": "prof_name_moderate_risk_surgical",
+        "badge_key": "prof_badge_moderate_risk_surgical",
+        "desc_key": "prof_desc_moderate_risk_surgical",
         "name": "Moderate-Risk Post-Surgical (Regimen Adjusted)",
         "badge": "⚠️ Moderate Risk / Regimen Adjustment",
         "description": (
@@ -200,6 +228,9 @@ SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
         },
     },
     "lower_risk_young_adult": {
+        "name_key": "prof_name_lower_risk_young_adult",
+        "badge_key": "prof_badge_lower_risk_young_adult",
+        "desc_key": "prof_desc_lower_risk_young_adult",
         "name": "Lower-Risk Young Adult (First Admission & Stable Oral Regimen)",
         "badge": "✅ Lower Risk / First Admission",
         "description": (
@@ -252,6 +283,9 @@ SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
         },
     },
     "missing_data_edge_case": {
+        "name_key": "prof_name_missing_data_edge_case",
+        "badge_key": "prof_badge_missing_data_edge_case",
+        "desc_key": "prof_desc_missing_data_edge_case",
         "name": "Missing Diagnostic Code & Unperformed Lab Tests (Documentation Edge Case)",
         "badge": "⚠️ Safety Edge Case / Incomplete Data",
         "description": (
@@ -304,6 +338,9 @@ SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
         },
     },
     "extended_stay_polypharmacy": {
+        "name_key": "prof_name_extended_stay_polypharmacy",
+        "badge_key": "prof_badge_extended_stay_polypharmacy",
+        "desc_key": "prof_desc_extended_stay_polypharmacy",
         "name": "Extended Stay (13 Days) with Extreme Polypharmacy (42 Meds)",
         "badge": "🚨 Higher Risk / Polypharmacy & Stay",
         "description": (
@@ -356,6 +393,9 @@ SAMPLE_PROFILES: Dict[str, Dict[str, Any]] = {
         },
     },
     "frequent_er_respiratory": {
+        "name_key": "prof_name_frequent_er_respiratory",
+        "badge_key": "prof_badge_frequent_er_respiratory",
+        "desc_key": "prof_desc_frequent_er_respiratory",
         "name": "Frequent ER Utilization with Chronic COPD (Non-Insulin Managed)",
         "badge": "⚠️ Moderate to High / ER Utilizer",
         "description": (
@@ -416,7 +456,8 @@ DEFAULT_PROFILE_KEY = "high_risk_geriatric"
 # Input Validation & Preprocessing Preparation
 # -----------------------------------------------------------------------------
 def validate_patient_input(
-    raw_data: Dict[str, Any]
+    raw_data: Dict[str, Any],
+    lang: str = "English",
 ) -> Tuple[bool, List[str], pd.DataFrame]:
     """
     Validates user-submitted encounter values, checks boundary conditions,
@@ -470,15 +511,13 @@ def validate_patient_input(
 
         # Diagnostic documentation check
         if cat_col == "diag_1" and clean_str in ["?", "Unknown", "Missing"]:
-            advisory_notes.append(
-                "Primary diagnosis ICD-9 code is unrecorded. Categorized as 'Missing' per standard benchmark rules."
-            )
+            advisory_notes.append(t("np_adv_missing_diag", lang))
 
         # Lab test unperformed advisory
         if cat_col == "A1Cresult" and clean_str in ["Unknown", "None", "?"]:
-            advisory_notes.append("HbA1c laboratory assessment was not recorded during this encounter.")
+            advisory_notes.append(t("np_adv_missing_a1c", lang))
         if cat_col == "max_glu_serum" and clean_str in ["Unknown", "None", "?"]:
-            advisory_notes.append("Fasting serum glucose test was not recorded during this encounter.")
+            advisory_notes.append(t("np_adv_missing_glu", lang))
 
         clean_dict[cat_col] = clean_str
 
@@ -649,7 +688,10 @@ def render_new_patient_tab(
     st.caption(t("np_profile_select_caption", lang))
 
     profile_keys = list(SAMPLE_PROFILES.keys())
-    profile_names = [f"{SAMPLE_PROFILES[k]['badge']} - {SAMPLE_PROFILES[k]['name']}" for k in profile_keys]
+    profile_names = [
+        f"{get_profile_badge(SAMPLE_PROFILES[k], lang)} - {get_profile_name(SAMPLE_PROFILES[k], lang)}"
+        for k in profile_keys
+    ]
 
     p_col1, p_col2 = st.columns([3, 1])
     with p_col1:
@@ -665,6 +707,7 @@ def render_new_patient_tab(
 
     active_p_key = profile_keys[selected_p_idx]
     active_profile = SAMPLE_PROFILES[active_p_key]
+    profile_desc = get_profile_desc(active_profile, lang)
 
     # Display scenario clinical narrative
     st.markdown(
@@ -672,7 +715,7 @@ def render_new_patient_tab(
         <div style="background: {'rgba(15, 23, 42, 0.6)' if is_dark else '#F8FAFC'};
                     border: 1px dashed {'#475569' if is_dark else '#CBD5E1'};
                     padding: 0.65rem 0.85rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.83rem;">
-            <strong>Scenario Brief:</strong> {active_profile['description']}
+            <strong>{t('np_scenario_brief_label', lang)}</strong> {profile_desc}
         </div>
         """,
         unsafe_allow_html=True,
@@ -692,6 +735,9 @@ def render_new_patient_tab(
             st.session_state[f"np_val_{k}"] = active_profile["data"].get(k)
         st.session_state["np_form_initialized"] = True
         st.session_state["np_active_profile_name"] = active_profile["name"]
+        st.session_state["np_form_version"] = st.session_state.get("np_form_version", 0) + 1
+
+    form_ver = st.session_state.get("np_form_version", 0)
 
     # -------------------------------------------------------------------------
     # Manual Input Form
@@ -705,39 +751,30 @@ def render_new_patient_tab(
             age_options = ["[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"]
             cur_age = str(st.session_state.get("np_val_age", "[50-60)"))
             age_idx = age_options.index(cur_age) if cur_age in age_options else 5
-            val_age = st.selectbox(t("prof_age_bracket", lang), age_options, index=age_idx)
+            val_age = st.selectbox(t("prof_age_bracket", lang), age_options, index=age_idx, key=f"np_in_age_{form_ver}")
 
         with d_col2:
             gender_options = ["Female", "Male", "Unknown/Invalid"]
             cur_gender = str(st.session_state.get("np_val_gender", "Female"))
             gender_idx = gender_options.index(cur_gender) if cur_gender in gender_options else 0
-            val_gender = st.selectbox(t("prof_gender", lang), gender_options, index=gender_idx)
+            val_gender = st.selectbox(t("prof_gender", lang), gender_options, index=gender_idx, key=f"np_in_gender_{form_ver}")
 
         with d_col3:
             race_options = ["Caucasian", "AfricanAmerican", "Hispanic", "Asian", "Other", "Unknown"]
             cur_race = str(st.session_state.get("np_val_race", "Caucasian"))
             race_idx = race_options.index(cur_race) if cur_race in race_options else 0
-            val_race = st.selectbox(t("prof_race", lang), race_options, index=race_idx)
+            val_race = st.selectbox(t("prof_race", lang), race_options, index=race_idx, key=f"np_in_race_{form_ver}")
 
         with d_col4:
-            adm_type_map = {
-                "1": "1 - Emergency",
-                "2": "2 - Urgent",
-                "3": "3 - Elective",
-                "4": "4 - Newborn",
-                "5": "5 - Not Available",
-                "6": "6 - NULL / Unrecorded",
-                "7": "7 - Trauma Center",
-                "8": "8 - Not Mapped",
-            }
-            type_keys = list(adm_type_map.keys())
+            type_keys = ["1", "2", "3", "4", "5", "6", "7", "8"]
             cur_type = str(st.session_state.get("np_val_admission_type_id", "1"))
             type_idx = type_keys.index(cur_type) if cur_type in type_keys else 0
             val_adm_type = st.selectbox(
                 t("prof_adm_type", lang),
                 type_keys,
                 index=type_idx,
-                format_func=lambda k: adm_type_map[k],
+                format_func=lambda k: translate_adm_type(k, lang),
+                key=f"np_in_adm_type_{form_ver}",
             )
 
         # Section 2: Hospital Stay & Utilization History
@@ -751,6 +788,7 @@ def render_new_patient_tab(
                 max_value=14,
                 value=int(st.session_state.get("np_val_time_in_hospital", 4)),
                 step=1,
+                key=f"np_in_los_{form_ver}",
             )
             val_inpatient = st.number_input(
                 t("prof_prior_adm", lang),
@@ -758,6 +796,7 @@ def render_new_patient_tab(
                 max_value=25,
                 value=int(st.session_state.get("np_val_number_inpatient", 0)),
                 step=1,
+                key=f"np_in_inpatient_{form_ver}",
             )
 
         with u_col2:
@@ -767,6 +806,7 @@ def render_new_patient_tab(
                 max_value=25,
                 value=int(st.session_state.get("np_val_number_emergency", 0)),
                 step=1,
+                key=f"np_in_emergency_{form_ver}",
             )
             val_outpatient = st.number_input(
                 t("prof_prior_op", lang),
@@ -774,6 +814,7 @@ def render_new_patient_tab(
                 max_value=40,
                 value=int(st.session_state.get("np_val_number_outpatient", 0)),
                 step=1,
+                key=f"np_in_outpatient_{form_ver}",
             )
 
         with u_col3:
@@ -783,13 +824,15 @@ def render_new_patient_tab(
                 max_value=132,
                 value=int(st.session_state.get("np_val_num_lab_procedures", 40)),
                 step=1,
+                key=f"np_in_labs_{form_ver}",
             )
             val_procedures = st.number_input(
-                "Diagnostic Procedures (0-6)",
+                t("np_num_procedures", lang),
                 min_value=0,
                 max_value=6,
                 value=int(st.session_state.get("np_val_num_procedures", 1)),
                 step=1,
+                key=f"np_in_procedures_{form_ver}",
             )
 
         with u_col4:
@@ -799,55 +842,50 @@ def render_new_patient_tab(
                 max_value=81,
                 value=int(st.session_state.get("np_val_num_medications", 15)),
                 step=1,
+                key=f"np_in_med_count_{form_ver}",
             )
             val_diag_count = st.number_input(
-                "Documented Diagnoses (1-16)",
+                t("np_num_diagnoses", lang),
                 min_value=1,
                 max_value=16,
                 value=int(st.session_state.get("np_val_number_diagnoses", 7)),
                 step=1,
+                key=f"np_in_diag_count_{form_ver}",
             )
 
         # Section 3: Clinical Diagnoses (ICD-9 Codes)
         st.markdown(f"#### 3. {t('np_sec_diagnoses', lang)}")
-        st.caption("Enter standard 3-digit ICD-9 codes (e.g. 428=Heart Failure, 250=Diabetes, 486=Pneumonia, 530=Digestive, ?=Missing).")
+        st.caption(t("np_sec_diagnoses_caption", lang))
         dg_col1, dg_col2, dg_col3, dg_col4 = st.columns(4)
 
         with dg_col1:
             val_diag1 = st.text_input(
-                "Primary ICD-9 (`diag_1`)",
+                t("np_diag_1_label", lang),
                 value=str(st.session_state.get("np_val_diag_1", "414")),
+                key=f"np_in_diag1_{form_ver}",
             )
         with dg_col2:
             val_diag2 = st.text_input(
-                "Secondary ICD-9 (`diag_2`)",
+                t("np_diag_2_label", lang),
                 value=str(st.session_state.get("np_val_diag_2", "250")),
+                key=f"np_in_diag2_{form_ver}",
             )
         with dg_col3:
             val_diag3 = st.text_input(
-                "Tertiary ICD-9 (`diag_3`)",
+                t("np_diag_3_label", lang),
                 value=str(st.session_state.get("np_val_diag_3", "401")),
+                key=f"np_in_diag3_{form_ver}",
             )
         with dg_col4:
-            adm_src_map = {
-                "7": "7 - Emergency Room",
-                "1": "1 - Physician Referral",
-                "2": "2 - Clinic Referral",
-                "3": "3 - HMO Referral",
-                "4": "4 - Transfer from Hospital",
-                "5": "5 - Transfer from SNF",
-                "6": "6 - Transfer from Other Facility",
-                "10": "10 - Critical Access Hospital",
-                "20": "20 - Not Mapped",
-            }
-            src_keys = list(adm_src_map.keys())
+            src_keys = ["7", "1", "2", "3", "4", "5", "6", "10", "20"]
             cur_src = str(st.session_state.get("np_val_admission_source_id", "7"))
             src_idx = src_keys.index(cur_src) if cur_src in src_keys else 0
             val_adm_src = st.selectbox(
                 t("prof_adm_source", lang),
                 src_keys,
                 index=src_idx,
-                format_func=lambda k: adm_src_map[k],
+                format_func=lambda k: translate_adm_source(k, lang),
+                key=f"np_in_adm_src_{form_ver}",
             )
 
         # Section 4: Glycemic Lab Markers & Medication Adjustment
@@ -858,13 +896,13 @@ def render_new_patient_tab(
             a1c_options = ["None", "Norm", ">7", ">8", "Unknown"]
             cur_a1c = str(st.session_state.get("np_val_A1Cresult", "Norm"))
             a1c_idx = a1c_options.index(cur_a1c) if cur_a1c in a1c_options else 1
-            val_a1c = st.selectbox(t("prof_a1c", lang), a1c_options, index=a1c_idx)
+            val_a1c = st.selectbox(t("prof_a1c", lang), a1c_options, index=a1c_idx, key=f"np_in_a1c_{form_ver}")
 
         with g_col2:
             glu_options = ["None", "Norm", ">200", ">300", "Unknown"]
             cur_glu = str(st.session_state.get("np_val_max_glu_serum", "None"))
             glu_idx = glu_options.index(cur_glu) if cur_glu in glu_options else 0
-            val_glu = st.selectbox(t("prof_glucose", lang), glu_options, index=glu_idx)
+            val_glu = st.selectbox(t("prof_glucose", lang), glu_options, index=glu_idx, key=f"np_in_glu_{form_ver}")
 
         with g_col3:
             chg_options = ["No", "Ch"]
@@ -874,14 +912,15 @@ def render_new_patient_tab(
                 f"{t('prof_med_chg', lang)} (`change`)",
                 chg_options,
                 index=chg_idx,
-                format_func=lambda c: "Ch - Medication Adjusted" if c == "Ch" else "No - No Dosage Change",
+                format_func=lambda c: t("np_med_ch_desc", lang) if c == "Ch" else t("np_med_no_desc", lang),
+                key=f"np_in_change_{form_ver}",
             )
 
         with g_col4:
             dm_options = ["Yes", "No"]
             cur_dm = str(st.session_state.get("np_val_diabetesMed", "Yes"))
             dm_idx = dm_options.index(cur_dm) if cur_dm in dm_options else 0
-            val_dm = st.selectbox(t("prof_dm_med", lang), dm_options, index=dm_idx)
+            val_dm = st.selectbox(t("prof_dm_med", lang), dm_options, index=dm_idx, key=f"np_in_dm_{form_ver}")
 
         # Section 5: Specific Antidiabetic Agents
         st.markdown(f"#### 5. {t('np_sec_medications', lang)}")
@@ -890,63 +929,77 @@ def render_new_patient_tab(
         with m_col1:
             ins_cur = str(st.session_state.get("np_val_insulin", "No"))
             ins_idx = MED_OPTIONS_FOUR.index(ins_cur) if ins_cur in MED_OPTIONS_FOUR else 0
-            val_insulin = st.selectbox(t("prof_insulin", lang), MED_OPTIONS_FOUR, index=ins_idx)
+            val_insulin = st.selectbox(t("prof_insulin", lang), MED_OPTIONS_FOUR, index=ins_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_insulin_{form_ver}")
 
         with m_col2:
             met_cur = str(st.session_state.get("np_val_metformin", "No"))
             met_idx = MED_OPTIONS_FOUR.index(met_cur) if met_cur in MED_OPTIONS_FOUR else 0
-            val_metformin = st.selectbox("Metformin", MED_OPTIONS_FOUR, index=met_idx)
+            val_metformin = st.selectbox("Metformin", MED_OPTIONS_FOUR, index=met_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_metformin_{form_ver}")
 
         with m_col3:
             glp_cur = str(st.session_state.get("np_val_glipizide", "No"))
             glp_idx = MED_OPTIONS_FOUR.index(glp_cur) if glp_cur in MED_OPTIONS_FOUR else 0
-            val_glipizide = st.selectbox("Glipizide", MED_OPTIONS_FOUR, index=glp_idx)
+            val_glipizide = st.selectbox("Glipizide", MED_OPTIONS_FOUR, index=glp_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glipizide_{form_ver}")
 
         with m_col4:
             gly_cur = str(st.session_state.get("np_val_glyburide", "No"))
             gly_idx = MED_OPTIONS_FOUR.index(gly_cur) if gly_cur in MED_OPTIONS_FOUR else 0
-            val_glyburide = st.selectbox("Glyburide", MED_OPTIONS_FOUR, index=gly_idx)
+            val_glyburide = st.selectbox("Glyburide", MED_OPTIONS_FOUR, index=gly_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glyburide_{form_ver}")
 
         p2_col1, p2_col2, p2_col3, p2_col4 = st.columns(4)
         with p2_col1:
             glm_cur = str(st.session_state.get("np_val_glimepiride", "No"))
             glm_idx = MED_OPTIONS_FOUR.index(glm_cur) if glm_cur in MED_OPTIONS_FOUR else 0
-            val_glimepiride = st.selectbox("Glimepiride", MED_OPTIONS_FOUR, index=glm_idx)
+            val_glimepiride = st.selectbox("Glimepiride", MED_OPTIONS_FOUR, index=glm_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glimepiride_{form_ver}")
 
         with p2_col2:
             pio_cur = str(st.session_state.get("np_val_pioglitazone", "No"))
             pio_idx = MED_OPTIONS_FOUR.index(pio_cur) if pio_cur in MED_OPTIONS_FOUR else 0
-            val_pioglitazone = st.selectbox("Pioglitazone", MED_OPTIONS_FOUR, index=pio_idx)
+            val_pioglitazone = st.selectbox("Pioglitazone", MED_OPTIONS_FOUR, index=pio_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_pioglitazone_{form_ver}")
 
         with p2_col3:
             ros_cur = str(st.session_state.get("np_val_rosiglitazone", "No"))
             ros_idx = MED_OPTIONS_FOUR.index(ros_cur) if ros_cur in MED_OPTIONS_FOUR else 0
-            val_rosiglitazone = st.selectbox("Rosiglitazone", MED_OPTIONS_FOUR, index=ros_idx)
+            val_rosiglitazone = st.selectbox("Rosiglitazone", MED_OPTIONS_FOUR, index=ros_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_rosiglitazone_{form_ver}")
 
         with p2_col4:
             rep_cur = str(st.session_state.get("np_val_repaglinide", "No"))
             rep_idx = MED_OPTIONS_FOUR.index(rep_cur) if rep_cur in MED_OPTIONS_FOUR else 0
-            val_repaglinide = st.selectbox("Repaglinide", MED_OPTIONS_FOUR, index=rep_idx)
+            val_repaglinide = st.selectbox("Repaglinide", MED_OPTIONS_FOUR, index=rep_idx, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_repaglinide_{form_ver}")
 
         # Specialized Oral Agents Expander
         with st.expander(f"➕ {t('np_more_meds_expander', lang)}"):
             e_col1, e_col2, e_col3 = st.columns(3)
             with e_col1:
-                val_nateglinide = st.selectbox("Nateglinide", MED_OPTIONS_FOUR, index=0)
-                val_chlorpropamide = st.selectbox("Chlorpropamide", MED_OPTIONS_FOUR, index=0)
-                val_acarbose = st.selectbox("Acarbose", ["No", "Steady", "Up"], index=0)
-                val_miglitol = st.selectbox("Miglitol", MED_OPTIONS_FOUR, index=0)
-                val_tolbutamide = st.selectbox("Tolbutamide", MED_OPTIONS_TWO, index=0)
+                cur_nat = str(st.session_state.get("np_val_nateglinide", "No"))
+                val_nateglinide = st.selectbox("Nateglinide", MED_OPTIONS_FOUR, index=MED_OPTIONS_FOUR.index(cur_nat) if cur_nat in MED_OPTIONS_FOUR else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_nateglinide_{form_ver}")
+                cur_chl = str(st.session_state.get("np_val_chlorpropamide", "No"))
+                val_chlorpropamide = st.selectbox("Chlorpropamide", MED_OPTIONS_FOUR, index=MED_OPTIONS_FOUR.index(cur_chl) if cur_chl in MED_OPTIONS_FOUR else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_chlorpropamide_{form_ver}")
+                cur_aca = str(st.session_state.get("np_val_acarbose", "No"))
+                aca_opts = ["No", "Steady", "Up"]
+                val_acarbose = st.selectbox("Acarbose", aca_opts, index=aca_opts.index(cur_aca) if cur_aca in aca_opts else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_acarbose_{form_ver}")
+                cur_mig = str(st.session_state.get("np_val_miglitol", "No"))
+                val_miglitol = st.selectbox("Miglitol", MED_OPTIONS_FOUR, index=MED_OPTIONS_FOUR.index(cur_mig) if cur_mig in MED_OPTIONS_FOUR else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_miglitol_{form_ver}")
+                cur_tol = str(st.session_state.get("np_val_tolbutamide", "No"))
+                val_tolbutamide = st.selectbox("Tolbutamide", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_tol) if cur_tol in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_tolbutamide_{form_ver}")
             with e_col2:
-                val_tolazamide = st.selectbox("Tolazamide", ["No", "Steady", "Up"], index=0)
-                val_acetohexamide = st.selectbox("Acetohexamide", MED_OPTIONS_TWO, index=0)
-                val_troglitazone = st.selectbox("Troglitazone", MED_OPTIONS_TWO, index=0)
-                val_glyburide_met = st.selectbox("Glyburide-Metformin", MED_OPTIONS_FOUR, index=0)
-                val_glipizide_met = st.selectbox("Glipizide-Metformin", MED_OPTIONS_TWO, index=0)
+                cur_tola = str(st.session_state.get("np_val_tolazamide", "No"))
+                tola_opts = ["No", "Steady", "Up"]
+                val_tolazamide = st.selectbox("Tolazamide", tola_opts, index=tola_opts.index(cur_tola) if cur_tola in tola_opts else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_tolazamide_{form_ver}")
+                cur_ace = str(st.session_state.get("np_val_acetohexamide", "No"))
+                val_acetohexamide = st.selectbox("Acetohexamide", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_ace) if cur_ace in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_acetohexamide_{form_ver}")
+                cur_tro = str(st.session_state.get("np_val_troglitazone", "No"))
+                val_troglitazone = st.selectbox("Troglitazone", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_tro) if cur_tro in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_troglitazone_{form_ver}")
+                cur_glym = str(st.session_state.get("np_val_glyburide-metformin", "No"))
+                val_glyburide_met = st.selectbox("Glyburide-Metformin", MED_OPTIONS_FOUR, index=MED_OPTIONS_FOUR.index(cur_glym) if cur_glym in MED_OPTIONS_FOUR else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glyburide_met_{form_ver}")
+                cur_glpm = str(st.session_state.get("np_val_glipizide-metformin", "No"))
+                val_glipizide_met = st.selectbox("Glipizide-Metformin", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_glpm) if cur_glpm in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glipizide_met_{form_ver}")
             with e_col3:
-                val_glimepiride_pio = st.selectbox("Glimepiride-Pioglitazone", ["No"], index=0)
-                val_met_ros = st.selectbox("Metformin-Rosiglitazone", MED_OPTIONS_TWO, index=0)
-                val_met_pio = st.selectbox("Metformin-Pioglitazone", MED_OPTIONS_TWO, index=0)
+                val_glimepiride_pio = st.selectbox("Glimepiride-Pioglitazone", ["No"], index=0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_glimepiride_pio_{form_ver}")
+                cur_mr = str(st.session_state.get("np_val_metformin-rosiglitazone", "No"))
+                val_met_ros = st.selectbox("Metformin-Rosiglitazone", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_mr) if cur_mr in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_met_ros_{form_ver}")
+                cur_mp = str(st.session_state.get("np_val_metformin-pioglitazone", "No"))
+                val_met_pio = st.selectbox("Metformin-Pioglitazone", MED_OPTIONS_TWO, index=MED_OPTIONS_TWO.index(cur_mp) if cur_mp in MED_OPTIONS_TWO else 0, format_func=lambda o: translate_med_option(o, lang), key=f"np_in_met_pio_{form_ver}")
 
         # Form Submit Button
         st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
@@ -1006,7 +1059,7 @@ def render_new_patient_tab(
         }
 
         # 1. Validate inputs safely
-        is_valid, advisories, input_df = validate_patient_input(raw_submission)
+        is_valid, advisories, input_df = validate_patient_input(raw_submission, lang=lang)
         if not is_valid:
             st.error(t("np_validation_error", lang))
             return
@@ -1053,7 +1106,7 @@ def render_new_patient_tab(
                         {score_pct:.1f}%
                     </div>
                     <div style="font-size: 0.8rem; color: {'#94A3B8' if is_dark else '#64748B'};">
-                        Raw logit prob: {score_val:.4f}
+                        {t('np_raw_logit_prob', lang, val=score_val)}
                     </div>
                 </div>
                 """,
@@ -1084,7 +1137,7 @@ def render_new_patient_tab(
                         </span>
                     </div>
                     <div style="font-size: 0.8rem; color: {'#94A3B8' if is_dark else '#64748B'}; margin-top: 0.45rem;">
-                        Thresholds: High ≥ {high_threshold:.2f} · Mod ≥ {mod_threshold:.2f}
+                        {t('np_thresholds_label', lang, high=high_threshold, mod=mod_threshold)}
                     </div>
                 </div>
                 """,
@@ -1114,8 +1167,9 @@ def render_new_patient_tab(
         dq_flags = latest_result["dq_warnings"]
         if dq_flags or advisories:
             warning_items = []
+            doc_label = t("np_doc_notice", lang)
             for adv in advisories:
-                warning_items.append(f"<li><strong>Documentation Notice:</strong> {adv}</li>")
+                warning_items.append(f"<li><strong>{doc_label}:</strong> {adv}</li>")
             for w in dq_flags:
                 warning_items.append(f"<li><strong>{w['type']}:</strong> {w['text']}</li>")
 
