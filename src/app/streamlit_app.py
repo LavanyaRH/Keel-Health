@@ -1894,10 +1894,11 @@ def main():
     # -------------------------------------------------------------------------
     # Main Dashboard Tabs
     # -------------------------------------------------------------------------
-    tab_queue, tab_detail, tab_diagnostics = st.tabs([
+    tab_queue, tab_detail, tab_diagnostics, tab_predict = st.tabs([
         t("tab_queue_title", lang),
         t("tab_detail_title", lang),
         t("tab_diagnostics_title", lang),
+        t("tab_predict_title", lang),
     ])
 
     # -------------------------------------------------------------------------
@@ -2445,6 +2446,19 @@ def main():
             st.markdown(t("diagnostics_limitations_text", lang))
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------------
+    # TAB 4: New Patient Encounter Prediction
+    # -------------------------------------------------------------------------
+    with tab_predict:
+        from src.app.new_patient_prediction import render_new_patient_tab
+        render_new_patient_tab(
+            pipeline=pipeline,
+            high_threshold=high_threshold,
+            mod_threshold=mod_threshold,
+            is_dark=is_dark,
+            lang=lang,
+        )
 
 
 if __name__ == "__main__":

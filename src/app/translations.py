@@ -1015,6 +1015,113 @@ UI_STRINGS: Dict[str, Dict[str, str]] = {
             "ನೀವು ಇದನ್ನು ಚಲಾಯಿಸಿ ರಚಿಸಬಹುದು: `python src/models/train_model.py`."
         ),
     },
+
+    # Tab 4: New Patient Prediction Feature
+    "tab_predict_title": {
+        "English": "➕ New Patient Prediction",
+        "हिन्दी": "➕ नया रोगी जोखिम पूर्वानुमान",
+        "ಕನ್ನಡ": "➕ ಹೊಸ ರೋಗಿಯ ಅಪಾಯದ ಮುನ್ಸೂಚನೆ",
+    },
+    "np_header_title": {
+        "English": "New Patient Encounter Prediction",
+        "हिन्दी": "नया रोगी एनकाउंटर जोखिम पूर्वानुमान",
+        "ಕನ್ನಡ": "ಹೊಸ ರೋಗಿಯ ದಾಖಲಾತಿ ಅಪಾಯದ ಮುನ್ಸೂಚನೆ",
+    },
+    "np_header_subtitle": {
+        "English": "Interactive clinical decision-support calculator for estimating 30-day readmission risk on individual encounters",
+        "हिन्दी": "व्यक्तिगत एनकाउंटर पर 30-दिवसीय पुनः भर्ती जोखिम का अनुमान लगाने के लिए इंटरैक्टिव नैदानिक निर्णय-समर्थन कैलकुलेटर",
+        "ಕನ್ನಡ": "ವೈಯಕ್ತಿಕ ದಾಖಲಾತಿಗಳಲ್ಲಿ 30 ದಿನಗಳ ಮರುದಾಖಲಾತಿ ಅಪಾಯವನ್ನು ಅಂದಾಜಿಸಲು ಸಂವಾದಾತ್ಮಕ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ-ಬೆಂಬಲ ಕ್ಯಾಲ್ಕುಲೇಟರ್",
+    },
+    "np_badge_prototype": {
+        "English": "DECISION SUPPORT PROTOTYPE",
+        "हिन्दी": "निर्णय समर्थन प्रोटोटाइप",
+        "ಕನ್ನಡ": "ನಿರ್ಧಾರ ಬೆಂಬಲ ಮಾದರಿ",
+    },
+    "np_disclaimer_title": {
+        "English": "Clinical Prototype & Fictional Data Notice",
+        "हिन्दी": "नैदानिक प्रोटोटाइप और काल्पनिक डेटा सूचना",
+        "ಕನ್ನಡ": "ಕ್ಲಿನಿಕಲ್ ಮಾದರಿ ಮತ್ತು ಕಾಲ್ಪನಿಕ ಡೇಟಾ ಸೂಚನೆ",
+    },
+    "np_disclaimer_text": {
+        "English": "All pre-configured profiles are fictional scenarios designed for workflow feasibility demonstration. Model predictions are statistical research estimates from the baseline model and do not constitute clinical diagnoses or medical advice.",
+        "हिन्दी": "सभी पूर्व-कॉन्फ़िगर की गई प्रोफ़ाइल वर्कफ़्लो व्यवहार्यता प्रदर्शन के लिए डिज़ाइन किए गए काल्पनिक परिदृश्य हैं। मॉडल पूर्वानुमान बेसलाइन मॉडल से सांख्यिकीय शोध अनुमान हैं और नैदानिक निदान या चिकित्सा सलाह नहीं हैं।",
+        "ಕನ್ನಡ": "ಎಲ್ಲಾ ಮೊದಲೇ ಸಂರಚಿಸಲಾದ ವಿವರಗಳು ಕಾರ್ಯಪ್ರವಾಹದ ಪ್ರದರ್ಶನಕ್ಕಾಗಿ ವಿನ್ಯಾಸಗೊಳಿಸಲಾದ ಕಾಲ್ಪನಿಕ ಸನ್ನಿವೇಶಗಳಾಗಿವೆ. ಮಾದರಿ ಮುನ್ಸೂಚನೆಗಳು ಸಂಖ್ಯಾಶಾಸ್ತ್ರೀಯ ಸಂಶೋಧನಾ ಅಂದಾಜುಗಳಾಗಿದ್ದು, ಕ್ಲಿನಿಕಲ್ ರೋಗನಿರ್ಣಯ ಅಥವಾ ವೈದ್ಯಕೀಯ ಸಲಹೆಯಲ್ಲ.",
+    },
+    "np_profile_select_title": {
+        "English": "Load Fictional Scenario Profile",
+        "हिन्दी": "काल्पनिक परिदृश्य प्रोफ़ाइल लोड करें",
+        "ಕನ್ನಡ": "ಕಾಲ್ಪನಿಕ ಸನ್ನಿವೇಶದ ವಿವರವನ್ನು ಲೋಡ್ ಮಾಡಿ",
+    },
+    "np_profile_select_caption": {
+        "English": "Select a pre-populated clinical case to test different utilization histories, missing documentation, or stay characteristics.",
+        "हिन्दी": "विभिन्न उपयोग इतिहास, अनुपलब्ध दस्तावेज़, या अस्पताल ठहराव विशेषताओं का परीक्षण करने के लिए पूर्व-भरी नैदानिक केस चुनें।",
+        "ಕನ್ನಡ": "ವಿವಿಧ ಬಳಕೆಯ ಇತಿಹಾಸ, ದಾಖಲೆಗಳ ಕೊರತೆ ಅಥವಾ ಆಸ್ಪತ್ರೆ ವಾಸ್ತವ್ಯದ ಲಕ್ಷಣಗಳನ್ನು ಪರೀಕ್ಷಿಸಲು ಮೊದಲೇ ಭರ್ತಿ ಮಾಡಿದ ಕ್ಲಿನಿಕಲ್ ವಿವರವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    },
+    "np_profile_dropdown_label": {
+        "English": "Sample Profile",
+        "हिन्दी": "नमूना प्रोफ़ाइल",
+        "ಕನ್ನಡ": "ಮಾದರಿ ವಿವರ",
+    },
+    "np_btn_load_profile": {
+        "English": "Load Profile",
+        "हिन्दी": "प्रोफ़ाइल लोड करें",
+        "ಕನ್ನಡ": "ವಿವರ ಲೋಡ್ ಮಾಡಿ",
+    },
+    "np_sec_demographics": {
+        "English": "Patient Demographics & Admission Context",
+        "हिन्दी": "रोगी जनसांख्यिकी और दाखिला संदर्भ",
+        "ಕನ್ನಡ": "ರೋಗಿಯ ಜನಸಂಖ್ಯಾಶಾಸ್ತ್ರ ಮತ್ತು ದಾಖಲಾತಿ ಸಂದರ್ಭ",
+    },
+    "np_sec_utilization": {
+        "English": "Hospital Stay & Prior Utilization History",
+        "हिन्दी": "अस्पताल अवधि और पूर्व उपयोग इतिहास",
+        "ಕನ್ನಡ": "ಆಸ್ಪತ್ರೆ ವಾಸ್ತವ್ಯ ಮತ್ತು ಹಿಂದಿನ ಬಳಕೆಯ ಇತಿಹಾಸ",
+    },
+    "np_sec_diagnoses": {
+        "English": "Clinical Diagnostic Codes (ICD-9)",
+        "हिन्दी": "नैदानिक डायग्नोस्टिक कोड (ICD-9)",
+        "ಕನ್ನಡ": "ಕ್ಲಿನಿಕಲ್ ಡಯಾಗ್ನೋಸ್ಟಿಕ್ ಕೋಡ್‌ಗಳು (ICD-9)",
+    },
+    "np_sec_glycemic": {
+        "English": "Glycemic Markers & Regimen Adjustments",
+        "हिन्दी": "ग्लाइसेमिक मार्कर और दवा व्यवस्था समायोजन",
+        "ಕನ್ನಡ": "ಗ್ಲೈಸೆಮಿಕ್ ಗುರುತುಗಳು ಮತ್ತು ಔಷಧಿ ಹೊಂದಾಣಿಕೆಗಳು",
+    },
+    "np_sec_medications": {
+        "English": "Primary Antidiabetic Regimen",
+        "हिन्दी": "प्राथमिक एंटीडायबिटिक दवाएं",
+        "ಕನ್ನಡ": "ಪ್ರಾಥಮಿಕ ಮಧುಮೇಹ ವಿರೋಧಿ ಔಷಧಿಗಳು",
+    },
+    "np_more_meds_expander": {
+        "English": "Additional Specialized Antidiabetic Agents (14 meds)",
+        "हिन्दी": "अतिरिक्त विशिष्ट एंटीडायबिटिक दवाएं (14 दवाएं)",
+        "ಕನ್ನಡ": "ಹೆಚ್ಚುವರಿ ವಿಶೇಷ ಮಧುಮೇಹ ವಿರೋಧಿ ಔಷಧಿಗಳು (14 ಔಷಧಿಗಳು)",
+    },
+    "np_btn_predict": {
+        "English": "Calculate Readmission Risk",
+        "हिन्दी": "पुनः भर्ती जोखिम की गणना करें",
+        "ಕನ್ನಡ": "ಮರುದಾಖಲಾತಿ ಅಪಾಯವನ್ನು ಲೆಕ್ಕಹಾಕಿ",
+    },
+    "np_validation_error": {
+        "English": "Form validation failed. Please check your inputs and try again.",
+        "हिन्दी": "फ़ॉर्म सत्यापन विफल रहा। कृपया अपने इनपुट की जाँच करें और पुनः प्रयास करें।",
+        "ಕನ್ನಡ": "ಫಾರ್ಮ್ ಮೌಲ್ಯಮಾಪನ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ನಮೂದುಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    },
+    "np_results_title": {
+        "English": "Prediction & Attribution Results",
+        "हिन्दी": "पूर्वानुमान और विशेषता परिणाम",
+        "ಕನ್ನಡ": "ಮುನ್ಸೂಚನೆ ಮತ್ತು ಕೊಡುಗೆ ಫಲಿತಾಂಶಗಳು",
+    },
+    "np_results_subtitle": {
+        "English": "Individualized risk score estimate and linear feature contributions from fitted baseline model",
+        "हिन्दी": "फिट किए गए बेसलाइन मॉडल से व्यक्तिगत जोखिम स्कोर अनुमान और रैखिक विशेषता योगदान",
+        "ಕನ್ನಡ": "ತರಬೇತಿ ಪಡೆದ ಮಾದರಿಯಿಂದ ವೈಯಕ್ತಿಕ ಅಪಾಯದ ಸ್ಕೋರ್ ಅಂದಾಜು ಮತ್ತು ರೇಖೀಯ ಕೊಡುಗೆಗಳು",
+    },
+    "np_margin_label": {
+        "English": "Decision Boundary Proximity",
+        "हिन्दी": "निर्णय सीमा निकटता",
+        "ಕನ್ನಡ": "ನಿರ್ಧಾರದ ಗಡಿಯ ಸಾಮೀಪ್ಯ",
+    },
 }
 
 # Tiers Translation
