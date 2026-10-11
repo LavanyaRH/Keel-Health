@@ -1,0 +1,144 @@
+{
+  "model_type": "RandomForestClassifier",
+  "hyperparameters": {
+    "n_estimators": 200,
+    "max_depth": 15,
+    "min_samples_split": 20,
+    "min_samples_leaf": 10,
+    "max_features": "sqrt",
+    "class_weight": "balanced",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "created_at_utc": "2026-10-11T09:08:19.698541+00:00",
+  "dataset_metadata": {
+    "raw_shape": [
+      101766,
+      50
+    ],
+    "cohort_shape": [
+      99343,
+      50
+    ],
+    "terminal_excluded": true,
+    "terminal_encounters_count": 2423,
+    "random_state": 42,
+    "test_size": 0.2,
+    "train_rows": 79541,
+    "test_rows": 19802,
+    "train_unique_patients": 55992,
+    "test_unique_patients": 13998,
+    "train_positive_count": 9098,
+    "train_positive_rate": 0.1144,
+    "test_positive_count": 2216,
+    "test_positive_rate": 0.1119,
+    "numerical_features_count": 8,
+    "categorical_features_count": 33,
+    "total_selected_features_count": 41,
+    "include_discharge_disposition": false,
+    "excluded_features": {
+      "encounter_id": "Primary key identifier (100% unique per row, memorization hazard).",
+      "patient_nbr": "Patient identifier (leakage hazard; reserved exclusively as group split key).",
+      "readmitted": "Target variable (separated as y label).",
+      "weight": "Extremely high missingness (96.86% '?'). Imputing would create severe artificial noise.",
+      "payer_code": "High missingness (39.56% '?') and administrative billing code with no clinical physiological relevance.",
+      "medical_specialty": "High missingness (49.08% '?') and high cardinality (73 categories). Blind imputation introduces substantial noise.",
+      "examide": "Zero variance / constant feature (100% 'No').",
+      "citoglipton": "Zero variance / constant feature (100% 'No').",
+      "discharge_disposition_id": "Excluded from baseline features to prevent post-prediction timing leakage and intervention confounding. Discharge disposition is only determined at final discharge and reflects care interventions (e.g. SNF, Home Health), making it unavailable during earlier inpatient stay decision points."
+    }
+  },
+  "evaluation_threshold": 0.5,
+  "metrics_summary": {
+    "roc_auc": 0.6433,
+    "pr_auc": 0.1961,
+    "precision": 0.1742,
+    "recall": 0.4923,
+    "f1_score": 0.2573,
+    "specificity": 0.7059,
+    "accuracy": 0.682
+  },
+  "top_feature_importances": [
+    {
+      "feature": "num__number_inpatient",
+      "importance": 0.20694
+    },
+    {
+      "feature": "num__num_medications",
+      "importance": 0.06884
+    },
+    {
+      "feature": "num__num_lab_procedures",
+      "importance": 0.0668
+    },
+    {
+      "feature": "num__time_in_hospital",
+      "importance": 0.0584
+    },
+    {
+      "feature": "num__number_diagnoses",
+      "importance": 0.04561
+    },
+    {
+      "feature": "num__number_emergency",
+      "importance": 0.04025
+    },
+    {
+      "feature": "num__num_procedures",
+      "importance": 0.03222
+    },
+    {
+      "feature": "num__number_outpatient",
+      "importance": 0.0192
+    },
+    {
+      "feature": "cat__age_[50-60)",
+      "importance": 0.01295
+    },
+    {
+      "feature": "cat__insulin_No",
+      "importance": 0.01164
+    },
+    {
+      "feature": "cat__gender_Female",
+      "importance": 0.01137
+    },
+    {
+      "feature": "cat__gender_Male",
+      "importance": 0.01136
+    },
+    {
+      "feature": "cat__diag_1_Circulatory",
+      "importance": 0.01097
+    },
+    {
+      "feature": "cat__diag_1_Respiratory",
+      "importance": 0.0102
+    },
+    {
+      "feature": "cat__admission_source_id_7",
+      "importance": 0.01005
+    },
+    {
+      "feature": "cat__age_[70-80)",
+      "importance": 0.00994
+    },
+    {
+      "feature": "cat__A1Cresult_Unknown",
+      "importance": 0.00968
+    },
+    {
+      "feature": "cat__diag_2_Circulatory",
+      "importance": 0.00961
+    },
+    {
+      "feature": "cat__age_[80-90)",
+      "importance": 0.00956
+    },
+    {
+      "feature": "cat__admission_type_id_1",
+      "importance": 0.00937
+    }
+  ],
+  "disclaimer": "RESEARCH PROTOTYPE DISCLAIMER: This model is developed for algorithmic research and workflow feasibility prototyping using historical diabetes encounter records. It is NOT a clinically validated diagnostic or prognostic medical device and does NOT claim clinical effectiveness."
+}

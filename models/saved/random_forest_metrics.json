@@ -1,0 +1,53 @@
+{
+  "roc_auc": 0.6433,
+  "pr_auc": 0.1961,
+  "precision": 0.1742,
+  "recall": 0.4923,
+  "f1_score": 0.2573,
+  "specificity": 0.7059,
+  "accuracy": 0.682,
+  "decision_threshold": 0.5,
+  "confusion_matrix": {
+    "true_negatives": 12414,
+    "false_positives": 5172,
+    "false_negatives": 1125,
+    "true_positives": 1091,
+    "matrix_array": [
+      [
+        12414,
+        5172
+      ],
+      [
+        1125,
+        1091
+      ]
+    ]
+  },
+  "classification_report": {
+    "No Early Readmit (0)": {
+      "precision": 0.9169067139375139,
+      "recall": 0.7059024223814397,
+      "f1-score": 0.7976867469879518,
+      "support": 17586.0
+    },
+    "Early Readmit <30d (1)": {
+      "precision": 0.1741976688487945,
+      "recall": 0.49232851985559567,
+      "f1-score": 0.25734166764948696,
+      "support": 2216.0
+    },
+    "accuracy": 0.682001817998182,
+    "macro avg": {
+      "precision": 0.5455521913931543,
+      "recall": 0.5991154711185177,
+      "f1-score": 0.5275142073187193,
+      "support": 19802.0
+    },
+    "weighted avg": {
+      "precision": 0.8337917132347262,
+      "recall": 0.682001817998182,
+      "f1-score": 0.7372178703182196,
+      "support": 19802.0
+    }
+  }
+}

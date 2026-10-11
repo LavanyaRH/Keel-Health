@@ -1,0 +1,99 @@
+{
+  "comparison_timestamp_utc": "2026-10-11T09:08:19.698348+00:00",
+  "evaluation_protocol": {
+    "dataset": "UCI Diabetes 130-US Hospitals (1999-2008)",
+    "split_type": "GroupShuffleSplit (grouped by patient_nbr, zero cross-patient leakage)",
+    "test_size": 0.2,
+    "test_encounters": 19802,
+    "test_unique_patients": 13998,
+    "test_positive_prevalence": 0.1119,
+    "decision_threshold": 0.5
+  },
+  "metrics_comparison": {
+    "roc_auc": {
+      "label": "ROC-AUC (Discrimination)",
+      "logistic_regression": 0.6393,
+      "random_forest": 0.6433,
+      "delta_rf_minus_lr": 0.004,
+      "percent_change": 0.63,
+      "higher_performing": "Random Forest"
+    },
+    "pr_auc": {
+      "label": "PR-AUC (Average Precision)",
+      "logistic_regression": 0.1978,
+      "random_forest": 0.1961,
+      "delta_rf_minus_lr": -0.0017,
+      "percent_change": -0.86,
+      "higher_performing": "Logistic Regression"
+    },
+    "recall": {
+      "label": "Recall / Sensitivity",
+      "logistic_regression": 0.5293,
+      "random_forest": 0.4923,
+      "delta_rf_minus_lr": -0.037,
+      "percent_change": -6.99,
+      "higher_performing": "Logistic Regression"
+    },
+    "precision": {
+      "label": "Precision (PPV)",
+      "logistic_regression": 0.1693,
+      "random_forest": 0.1742,
+      "delta_rf_minus_lr": 0.0049,
+      "percent_change": 2.89,
+      "higher_performing": "Random Forest"
+    },
+    "f1_score": {
+      "label": "F1-Score (Harmonic Mean)",
+      "logistic_regression": 0.2566,
+      "random_forest": 0.2573,
+      "delta_rf_minus_lr": 0.0007,
+      "percent_change": 0.27,
+      "higher_performing": "Random Forest"
+    },
+    "specificity": {
+      "label": "Specificity (TNR)",
+      "logistic_regression": 0.6728,
+      "random_forest": 0.7059,
+      "delta_rf_minus_lr": 0.0331,
+      "percent_change": 4.92,
+      "higher_performing": "Random Forest"
+    },
+    "accuracy": {
+      "label": "Accuracy (Secondary Reference)",
+      "logistic_regression": 0.6567,
+      "random_forest": 0.682,
+      "delta_rf_minus_lr": 0.0253,
+      "percent_change": 3.85,
+      "higher_performing": "Random Forest"
+    }
+  },
+  "confusion_matrix_comparison": {
+    "true_positives": {
+      "logistic_regression": 1173,
+      "random_forest": 1091,
+      "delta": -82
+    },
+    "false_negatives": {
+      "logistic_regression": 1043,
+      "random_forest": 1125,
+      "delta": 82
+    },
+    "true_negatives": {
+      "logistic_regression": 11831,
+      "random_forest": 12414,
+      "delta": 583
+    },
+    "false_positives": {
+      "logistic_regression": 5755,
+      "random_forest": 5172,
+      "delta": -583
+    }
+  },
+  "synthesis": {
+    "primary_ranking_winner": "Random Forest",
+    "clinical_sensitivity_winner": "Logistic Regression",
+    "precision_winner": "Random Forest",
+    "interpretability_tradeoff": "Logistic Regression provides direct, exact odds ratios (exp(beta_i)) and additive log-odds contributions, enabling patient-specific linear attribution in transitional care planning. Random Forest provides non-linear feature interaction modeling and tree ensemble Gini importances, but requires surrogate explanation methods (e.g. TreeSHAP) for local patient attribution.",
+    "clinical_summary": "Random Forest improved discrimination by 0.0040 ROC-AUC points (+0.63%). Recall was lower by 0.0370 (1,091 vs 1,173 true positive readmissions detected). Precision was higher by 0.0049."
+  }
+}
